@@ -3,8 +3,10 @@
 
     <div class="row justify-content-center">
         <div class="col-md-8">
+            <h2>{{__('Check logs: Last time quantity synced')}}</h2>
+            <hr>
             @if($productSynced)
-            <h2>{{__('Products quantity synced at: ')}}{{ $lastUpdated }}</h2>
+            <p>{{__('Products quantity synced at: ')}}<b>{{ $lastUpdated }}</b></p>
             @else
                 <h2>{{__('Need to sync your products quantity')}}</h2>
             @endif

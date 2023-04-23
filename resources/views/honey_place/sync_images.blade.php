@@ -4,6 +4,7 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
+        
         @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -14,7 +15,7 @@
         </div>
         @endif
         <h2>Sync product images</h2>
-
+        <hr>
         <form action="{{ route('admin.syn.images.post')}}" method="POST">
             @csrf
             <div class="mb-3">

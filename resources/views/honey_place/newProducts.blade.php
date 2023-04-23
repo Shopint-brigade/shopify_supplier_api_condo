@@ -4,6 +4,8 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
+        <h2>{{__('Product created by shopify weebhook')}}</h2>
+        <hr>
         @if (count($newProducts) !== 0)
         <table class="table">
             <thead>
