@@ -6,6 +6,7 @@ use App\Http\Classes\HoneyUtils;
 use App\Http\Classes\Shopify;
 use App\Models\Honey;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 
 
@@ -115,7 +116,12 @@ class HoneyController extends Controller
     // connect honey => get product qty => update DB
     HoneyUtils::connectToHoneyAndGetUpdateQTY($this->honey_account, $this->honey_password, $dbProductsSkus);
     // bring the products again
-    $dbProducts = Honey::select('inv_int_id', 'stock')->get();
+    $dbProducts = Honey::all();
+    // update synced_at field
+    foreach($dbProducts as $product) {
+      $product->synced_at = Carbon::now();
+      $product->save();
+    }
     // update the product qty on the store and give back the response to be used
     $this->shopify->updateProductQty($this->honey_password, $this->location_name, $dbProducts, false);
   }

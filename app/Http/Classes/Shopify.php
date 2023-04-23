@@ -165,7 +165,6 @@ class Shopify
     {
         $locationIDStr = explode("/", $this->getLocation($locationName, $pass));
         $locationID = end($locationIDStr);
-
         // guzzel promises to be handled
         $promises = [];
         // headers
