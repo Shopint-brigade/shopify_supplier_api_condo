@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('honey_products', function (Blueprint $table) {
             $table->id();
-
+            $table->string('title')->nullable();
             $table->string('sku')->nullable();
             $table->string('first_var_id')->nullable();
             $table->string('inv_item_id')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('barcode')->nullable();
             $table->enum('newProduct', ['yes', 'no'])->default('no');
             $table->timestamp('synced_at')->nullable();
-            // $table->enum('images', ['yes', 'no'])->default('yes');
+            $table->enum('imagesSynced', ['yes', 'no'])->default('no');
 
             $table->timestamps();
         });

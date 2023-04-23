@@ -135,6 +135,7 @@ class HoneyController extends Controller
       $data = json_decode($resData, true);
       // extract needed data
       $id = $data['id'];
+      $title = $data['title'];
       $admin_graphql_api_id = $data['admin_graphql_api_id'];
       $status = $data['status'];
       $variantID = $data['variants'][0]['id'];
@@ -149,6 +150,7 @@ class HoneyController extends Controller
       if ($status == "active") {
         $product = new Honey();
         $product->shopify_id = $admin_graphql_api_id;
+        $product->title = $title;
         $product->intID = $id;
         $product->sku = $sku;
         $product->first_var_id = $variantID;
@@ -170,8 +172,8 @@ class HoneyController extends Controller
   /**
    * Scrap product images on honey place site
    */
-  public function scrapProductImages()
-  {
-    HoneyUtils::parsingSearchResult();
-  }
+  // public function scrapProductImages()
+  // {
+  //   HoneyUtils::parsingSearchResult();
+  // }
 }

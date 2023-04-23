@@ -18,16 +18,24 @@ Route::get("/sync", [HoneyController::class, 'syncQtyHoneyDbStore']);
 //  Update the product qty on shopify store
 Route::get("/update-qty", [HoneyController::class, 'updateQtyOnShopifyStore']);
 // scrap images from honey_place
-Route::get("/scrap", [HoneyController::class, 'scrapProductImages']);
+// Route::get("/scrap", [HoneyController::class, 'scrapProductImages']);
 
 // Laravel Auth routes
 Auth::routes();
 
 // admin routes
+// main page
 Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// logs
 Route::get("/admin/logs", [DashboardController::class, 'logs'])->name('admin.logs');
+// display products added by shopify webhook
 Route::get("/admin/new-products", [DashboardController::class, 'newProducts'])->name('admin.new.products');
-
-
+// sync product image between honey place and shopify store
+Route::get('/admin/sync-images', [DashboardController::class, 'syncImages'])->name('admin.sync.images');
+Route::post('/admin/sync-images', [DashboardController::class, 'postSyncImages'])->name('admin.syn.images.post');
+// display products (images synced)
+Route::get('/admin/synced-products-images', [DashboardController::class, 'displaySyncedProducts'])->name('admin.list.syned.products');
 //  Shopify webhooks
 Route::post('/webhook-honey/newproduct', [HoneyController::class, 'receiveShopifyWebhookNewProduct']);
+
+

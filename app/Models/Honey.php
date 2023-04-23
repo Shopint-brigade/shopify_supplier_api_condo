@@ -14,6 +14,7 @@ class Honey extends Model
     public $table = 'honey_products';
 
     protected $fillable = [
+        'title',
         'sku',
         'inv_item_id',
         'first_var_id',
@@ -21,6 +22,7 @@ class Honey extends Model
         'stock',
         'barcode',
         'intID',
-        'inv_int_id'
+        'inv_int_id',
+        'imagesSynced'
     ];
 }

@@ -15,7 +15,9 @@
                     @endif
                     <ul class="list-group">
                         <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.logs') }}">{{ __('Logs') }}</a></li>
-                        <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.new.products') }}">{{ __('New Products') }}</a></li>
+                        <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.new.products') }}">{{ __('New Products(Created from shopify store)') }}</a></li>
+                        <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.sync.images') }}">{{ __('Sync Product Images') }}</a></li>
+                        <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.list.syned.products') }}">{{ __('Last 10 Synced products(Images)') }}</a></li>
                     </ul>
                 </div>
             </div>

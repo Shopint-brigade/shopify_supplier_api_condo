@@ -121,6 +121,7 @@ class Shopify
                             cursor
                             node{
                                 id
+                                title
                                 publishedAt
                                 variants(first:1){
                                     edges{
@@ -187,9 +188,26 @@ class Shopify
         }
         // handle the promises and get results
         $results = Promise\Utils::unwrap($promises);
-        if($returnData) {
+        if ($returnData) {
             return $results;
         }
     }
 
+    /**
+     * Update product images
+     */
+    public function updateProductImages($id, $pass, $images): int
+    {
+        // needed headers
+        $headers = [
+            'X-Shopify-Access-Token' => $pass,
+        ];
+        // data to be updated
+        $data = ['product' =>  ['id' =>   $id, 'images' =>  $images]];
+        // send the update request
+        $jsonData = json_encode($data);
+        $res = Http::withHeaders($headers)
+            ->put($this->url . '/products/' . $id . '.json', $data);
+        return $res->status();
+    }
 }

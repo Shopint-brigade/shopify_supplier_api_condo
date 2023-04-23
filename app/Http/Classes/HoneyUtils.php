@@ -8,8 +8,8 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Promise\EachPromise;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Response as HttpResponse;
-use Illuminate\Support\Facades\Http;
 use voku\helper\HtmlDomParser;
+
 
 class HoneyUtils
 {
@@ -24,6 +24,7 @@ class HoneyUtils
             $intID = end($arrId);
             Honey::create([
                 'shopify_id' => $product['id'],
+                'title' => $product['title'],
                 'intID' => $product['intID'],
                 'sku' => $product['variants']['edges'][0]['node']['sku'],
                 'first_var_id' => $product['variants']['edges'][0]['node']['id'],
@@ -128,120 +129,25 @@ class HoneyUtils
     /**
      * Honey product images scraper
      */
-    public static function parsingSearchResult()
+
+    public static function parsingProductImages(string $url)
     {
-        // require_once("simple_html_dom.php");
-        $upc = '812024032741';
-        $url = "http://api.scraperapi.com?api_key=bff67a41fc7541f5ef08cd1bf93e6c32&url=https://www.honeysplace.com/search?q=" . $upc . "&render=true&wait_for_selector=div.sku_section";
-        // $url = "http://api.scraperapi.com?api_key=bff67a41fc7541f5ef08cd1bf93e6c32&url=https://www.honeysplace.com/search?q=" . $upc . "&render=true";
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        $response = curl_exec($ch);
-        curl_close($ch);
-        $html = HtmlDomParser::str_get_html($response);
-        $nod = $html->find('p');
-        dd($nod->text());
-        
-        $html =  HtmlDomParser::file_get_html($url);
-        dd($html->find('.description'));
-        // $honeyUrl = "https://www.honeysplace.com/search?q=" . $upc . "&render=true";
-        // $payload = json_encode(
-        //     array(
-        //         "apiKey"
-        //         =>
-        //         "e063fcd2475b9ce39ee45b47174d3bb6",
-        //         "url"
-        //         =>
-        //         $honeyUrl
-        //     )
-        // );
-        // $ch = curl_init();
-        // curl_setopt(
-        //     $ch,
-        //     CURLOPT_URL,
-        //     "https://async.scraperapi.com/jobs"
-        // );
-        // curl_setOpt(
-        //     $ch,
-        //     CURLOPT_POST,
-        //     1
-        // );
-        // curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        // curl_setopt(
-        //     $ch,
-        //     CURLOPT_HTTPHEADER,
-        //     array(
-        //         "Content-Type:application/json"
-        //     )
-        // );
-        // curl_setopt(
-        //     $ch,
-        //     CURLOPT_RETURNTRANSFER,
-        //     TRUE
-        // );
-        // $faresRES = null;
-        // $response = curl_exec($ch);
-        // curl_close($ch);
-        // $statusUel = json_decode($response, true)['statusUrl'];
-        // $res = Http::get($statusUel);
-        // $response = $res->body();
-        
-        // do{
-        //     Http::get($statusUel);
-        // } while(json_decode($response, true)['status'] != "finished");
-     
-        // dd($faresRES);
-        // $url =
-        // "http://api.scraperapi.com?api_key=e063fcd2475b9ce39ee45b47174d3bb6&url=https://www.honeysplace.com/search?q=812024032741&render=true"; $ch = curl_init(); curl_setopt($ch, CURLOPT_URL, $url); curl_setopt($ch, CURLOPT_RETURNTRANSFER,
-        // TRUE); curl_setopt($ch, CURLOPT_HEADER,
-        // FALSE); curl_setopt($ch, CURLOPT_SSL_VERIFYHOST,
-        // 0); curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,
-        // 0); $response = curl_exec($ch); curl_close($ch); 
-        // // $dom = new simple_html_dom();
-        // $html = str_get_html($response);
-        // dd($linko = $html->find('#hits', 0));
-        // $final_link = 'https://www.honeysplace.com/' . $linko;
-        // $html =  HtmlDomParser::str_get_html($response);
-        // dd($html->find('.description a'));
-
-        // $url = "http://api.scraperapi.com?api_key=e063fcd2475b9ce39ee45b47174d3bb6&url=https://www.honeysplace.com/search?q=" . $upc . "&render=true";
-        // // $url = "https://www.honeysplace.com/search?q=" . $upc . "&render=true";
-        // // $response = Http::get($url);
-        // // dd($response->body());
-
-        // $ch = curl_init();
-        // curl_setopt($ch, CURLOPT_URL, $url);
-        // curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        // curl_setopt($ch, CURLOPT_HEADER, FALSE);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        // $response = curl_exec($ch);
-        // curl_close($ch);
-        // // echo $response;
-        // // dd($response);
-        // $html =  HtmlDomParser::file_get_html($url);
-
-        // $linko = $html->find('.description');
-        // dd($linko);
-
-        // dd($html) ;
-        // dd($html);
-        // dd($html->xml());
-        // $element = $html->find('.description', 0);
-        // return $element->text;
-        // $html = HtmlDomParser::str_get_html($response->body());
-        // return $html->find('#hits', 0);
-
-        // $data = $dom->find('div.results-wrapper #hits', 0);
-        // return $data->find('.ais-hits');
-
-    }
-
-    public static function parsingProductImages()
-    {
+        // init all product images
+        $images = [];
+        // init parser from url 
+        $html = HtmlDomParser::file_get_html($url);
+        // find product images
+        $productImages = $html->find('.owl_carousel img');
+        // if we have images
+        if($productImages->length != 0) {
+            foreach ($productImages as $img) {
+                if ($img->hasAttribute('data-zoom-image')) {
+                    $link = "https://www.honeysplace.com/" . $img->getAttribute('data-zoom-image');
+                    $new_img = [['src' => $link]];
+                    $images =  array_merge($images, $new_img);
+                }
+            };
+        }
+        return $images;
     }
 }
