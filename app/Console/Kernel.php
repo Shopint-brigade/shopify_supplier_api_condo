@@ -12,7 +12,15 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // HONEY TASKS
+        // prefer to run it once by run cron job on the server
+        // $schedule->command('honey:product-db-init')->monthly();
+
+        // connect to honey and update product qty on DB
+        // $schedule->command('honey:connect-honey')->everyTwoHours();
+
+        // update qty in DB and store with the qty from honey
+        $schedule->command('honey:sync-honey-db-shopify')->everyTwoHours();
     }
 
     /**
