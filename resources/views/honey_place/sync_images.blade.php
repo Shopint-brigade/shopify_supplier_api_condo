@@ -4,7 +4,7 @@
 
 <div class="row justify-content-center">
     <div class="col-md-8">
-        
+
         @if ($errors->any())
         <div class="alert alert-danger">
             <ul>
@@ -24,13 +24,8 @@
             </div>
             <div class="mb-3">
                 <label for="ptoductID" class="form-label">Shopiyfy products <b>({{count($products)}})</b></label>
-                <select name="product_id" class="form-select" aria-label="Default select example">
-                    <option disabled selected>Select Product</option>
-                    @foreach ($products as $p )
-                    <option value="{{$p->intID}}">{{$p->intID}} - {{$p->title}}</option>
-                    @endforeach
-
-                </select>
+                <input name="search" type="text" id="product-search" class="form-control" data-url="{{ route('admin.product.search') }}">
+                <input type="hidden" id="product_id" name="product_id">
             </div>
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -40,3 +35,32 @@
 </div>
 
 @endsection
+@push('script')
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script>
+    $('#product-search').autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: $('#product-search').data('url'),
+                dataType: 'json',
+                data: {
+                    search: request.term
+                },
+                success: function(data) {
+                    response($.map(data, function(item) {
+                        return {
+                            label: item.title,
+                            value: item.intID
+                        }
+                    }));
+                }
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            $('#product_id').val(ui.item.value);
+        }
+    });
+</script>
+@endpush

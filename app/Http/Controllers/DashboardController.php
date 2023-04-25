@@ -66,6 +66,21 @@ class DashboardController extends Controller
         return view("honey_place.sync_images", compact('products'));
     }
 
+    /**
+     * Get products from DB via ajax(uses auto-complete)
+     * Search by product title or id
+     */
+    public function searchProducts(Request $request)
+    {
+        $search = $request->get('search');
+        $products = Honey::select('title', 'intID')->where('title', 'like', '%' . $search . '%')
+        ->orWhere('intID', 'like', '%' . $search . '%')->get();
+        return response()->json($products);
+    }
+
+    /**
+     * Handle syncing images post  
+     */
     public function postSyncImages(ImagesSyncRequest $request)
     {
         // get data from form request

@@ -67,9 +67,6 @@ class HoneyController extends Controller
    */
   public function getShopifyProducts()
   {
-    // TEST FARES
-    // $products = $this->shopify->getProductsOfCollection($this->password, 202387161256);
-
     $products = $this->shopify->getProductsOfCollection($this->password, $this->collection_id);
     // save in DB first time
     HoneyUtils::saveProductsFirstTime($products);
@@ -174,12 +171,4 @@ class HoneyController extends Controller
       ], 401);
     }
   }
-
-  /**
-   * Scrap product images on honey place site
-   */
-  // public function scrapProductImages()
-  // {
-  //   HoneyUtils::parsingSearchResult();
-  // }
 }
