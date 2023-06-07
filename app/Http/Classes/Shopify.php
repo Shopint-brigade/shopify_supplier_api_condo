@@ -186,7 +186,8 @@ class Shopify
             ]);
         }
         // handle the promises and get results
-        $results = Promise\Utils::unwrap($promises);
+        // $results = Promise\Utils::unwrap($promises);
+        $results = Promise\Utils::settle($promises)->wait();
         if ($returnData) {
             return $results;
         }
