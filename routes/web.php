@@ -41,3 +41,12 @@ Route::get('/admin/synced-products-images', [DashboardController::class, 'displa
 Route::post('/webhook-honey/newproduct', [HoneyController::class, 'receiveShopifyWebhookNewProduct']);
 
 
+/**
+ * Enterenue
+ */
+
+Route::prefix('/admin/enterenue')->group(function() {
+    Route::get('/search', [DashboardController::class, 'enterenueSearchForm'])->name('admin.enterenue.search.form');
+    Route::post('/serach',[DashboardController::class, 'enterenueSearch'] )->name('admin.enterenue.search');
+    Route::get('/push/{upc}', [DashboardController::class, 'enterenuePushProduct'])->name('admin.enterenue.pushProduct');
+});

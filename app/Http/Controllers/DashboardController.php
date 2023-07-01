@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Classes\EnterenueUtils;
 use App\Http\Classes\HoneyUtils;
 use App\Http\Requests\ImagesSyncRequest;
 use App\Models\Honey;
@@ -39,7 +40,7 @@ class DashboardController extends Controller
     {
         $productSynced = false;
         $syncedDate = null;
-        if (!is_null(Honey::first()->synced_at)) {
+        if (!is_null(Honey::first()) && !is_null(Honey::first()->synced_at)) {
             $syncedDate = Carbon::parse(Honey::first()->synced_at)->toDayDateTimeString();
             $productSynced = true;
         }
@@ -74,7 +75,7 @@ class DashboardController extends Controller
     {
         $search = $request->get('search');
         $products = Honey::select('title', 'intID')->where('title', 'like', '%' . $search . '%')
-        ->orWhere('intID', 'like', '%' . $search . '%')->get();
+            ->orWhere('intID', 'like', '%' . $search . '%')->get();
         return response()->json($products);
     }
 
@@ -112,5 +113,33 @@ class DashboardController extends Controller
     {
         $products = Honey::select('title', 'intID', 'sku', 'stock')->where('imagesSynced', 'yes')->latest()->take(10)->get();
         return view("honey_place.list_products", compact('products'));
+    }
+
+    /**
+     * Enterenue
+     */
+
+    public function enterenueSearchForm()
+    {
+        return view('entrenue.search');
+    }
+
+    public function enterenueSearch(Request $request)
+    {
+        $request->validate([
+            'term' => 'required|min:3'
+        ]);
+
+        $res =  EnterenueUtils::search($request->term);
+        $total = $res['total'];
+        $title = $request->term;
+        $products = $res['data'];
+        // dd($res);
+        return view('entrenue.serach_result', compact(['title', 'total', 'products']));
+    }
+
+    public function enterenuePushProduct(Request $request, string $upc)
+    {
+        return EnterenueUtils::pushProductToShopify($upc);
     }
 }
