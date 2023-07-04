@@ -1,28 +1,266 @@
 <?php
 
 namespace App\Http\Classes;
+
 use Illuminate\Support\Facades\Http;
+use voku\helper\HtmlDomParser;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Cookie;
 
 
 class EnterenueUtils
 {
-    public static function search(string $term)
+    /**
+     * api login with some params(product ups , product name ...ect)
+     */
+    private static function loginGetApiRequest(string $urlSegment, string $paramName, string $paramValue)
     {
-        // login with creds
-        $res = Http::get(env('ENTERENUE_API_URL') .'/products', [
-            'email' => env('ENTERENUE_EMAIL'),
-            'apikey' => env('ENTERENUE_KEY'),
-            'name' => $term,
-        ]);
-        if ($res->failed()) {
-            log('Error: ' . $res->body());
-        }
+        try {
+            $queryParams = [
+                'email' => env('ENTERENUE_EMAIL'), // 'test@admin.com' 
+                'apikey' => env('ENTERENUE_KEY'),
+                $paramName => $paramValue,
+            ];
 
-        return $res->json();
+            $res = Http::get(env('ENTERENUE_API_URL') . $urlSegment, $queryParams);
+
+            if ($res->failed()) {
+                info($res->body());
+                $err = new \Exception('Check creds');
+                return ['error' => $err->getMessage(), 'data' => null];
+            }
+
+            return ['error' => null, 'data' => $res->json()];
+        } catch (RequestException $e) {
+            info($e->getMessage());
+            return  ['error' => $e->getMessage(), 'data' => null];
+        } catch (\Exception $e) {
+            info($e->getMessage());
+            return ['error' => $e->getMessage(), 'data' => null];
+        }
     }
 
-    public static function pushProductToShopify(string $upc)
+    public static function search(string $term)
     {
-        return 'push to shopify' . $upc;
+        return self::loginGetApiRequest('/products', 'name', $term);
+    }
+
+    public static function pushProductToShopify(string $upc, string $location, $request, $shopify)
+    {
+        $theError = null;
+        $itemLocationID = substr($location, strrpos($location, '/') + 1);
+        // Login creds
+        $url = env('ENTERENUE_LOGIN_URL');
+        $login = env('ENTERENUE_LOGIN');
+        $password = env('ENTERENUE_PASSWORD');
+        // login and get product via upc
+        ['error' => $error, 'data' => $data] = self::loginGetApiRequest('/products', 'upc', $upc);
+        /*
+          - generate product from data to be pushed to shopify store(all data except images)
+          - login to frontend and get parse product images
+        */
+        if (is_null($error)) {
+            // product to push to shopify store
+            $productToPushData = self::PrepareProductToPush($data);
+
+            // login
+            // self::fares($login, $password, $upc, $url);
+            $ch = self::accountLogin($url, $login, $password, $upc, $request);
+            $result = curl_exec($ch);
+            // search for product after loged in
+            $searchUrl = env('ENTERENUE_SEARCH_PRODUCT_URL') . $upc . '&description=true';
+            $result = self::logedINSerachProduct($ch, $searchUrl);
+            // get the product link from the main image href
+            $html = HtmlDomParser::str_get_html($result);
+            $productink = $html->find('.product-img')[0]->href;
+            //login again
+            $ch = self::accountLogin($url, $login, $password, $upc, $request);
+            $result = curl_exec($ch);
+            // single product page to get images
+            $url = $productink;
+            curl_setopt($ch, CURLOPT_POST, 0);
+            curl_setopt($ch, CURLOPT_URL, $url);
+            $result = curl_exec($ch);
+            curl_close($ch);
+            // Parse other images(not the main one)
+            [$x, $images] = self::parseProductImages($result);
+            // get product data readu to push to shopify store
+            $readyProductToPush = self::prpareProductData($x, $images, $productToPushData);
+            // push the ready product to shopify store
+            $createdProductResponse = $shopify->makeApiRequest('post', 'products', $readyProductToPush);
+            if(isset($createdProduct['error'])) {
+                $theError = $createdProductResponse['error'];
+            } 
+            // posting qty levels
+            $inventoryItemId = $createdProductResponse['product']['variants'][0]['inventory_item_id'];
+            $quantity = $data['data'][0]['quantity'] - 3;
+            $data = ['location_id' => $itemLocationID, 'inventory_item_id' =>   $createdProductResponse['product']['variants'][0]['inventory_item_id'], 'available' =>  $quantity];
+            $qtyLevelResponse = $shopify->makeApiRequest('post', 'inventory_levels/set', $data);
+            if(isset($qtyLevelReesult['error'])) {
+                $theError = $createdProductResponse['error'];
+            }
+            // posting item Gross Cost 
+            $data = ['inventory_item' =>  ['inventory_item_id' =>   $inventoryItemId, 'cost' =>  $productToPushData['gross']]];
+            $itemCostResponse = $shopify->makeApiRequest('put', 'inventory_items/' . $inventoryItemId, $data);
+            if(isset($itemCostResponse['error'])) {
+                $theError = $itemCostResponse['error'];
+            }
+        } else {
+            $theError = $error;
+        }
+        return $theError;
+    }
+
+    /**
+     * Prepare product to be pushed to shopify store
+     * here we collect all data except images
+     */
+    private static function PrepareProductToPush(array $data): array
+    {
+        $productToPush = null;
+        foreach ($data['data'] as $product) {
+            $upc = $product['upc'];
+            $name = $product['name'];
+            $image = $product['image'];
+            $description = strip_tags($product['description']);
+            $description = preg_replace('/<[^>]*>/', ' ', $description);
+            $description = html_entity_decode($description);
+            $tags = $product['categories'] . ',entrenue';
+            $gross = $product['price'];
+            $price = $product['price'] * 2;
+            $compare = $price * 0.2;
+            $compare = $compare + $price;
+            if (!empty($product['msrp'])) {
+                $compare = $product['msrp'];
+            } else {
+                $compare = '';
+            }
+            $map = $product['map'];
+            if (!empty($map)) {
+                echo '<br/>  MAP ' . $map . ' -- MAP <br/>';
+            } else {
+                $map = $price;
+                if (!empty($product['msrp'])) {
+                    if ($map  >=  $product['msrp']) {
+                        $map = $product['msrp'];
+                    }
+                }
+            }
+            if ($map == $compare) {
+                $compare = '';
+            }
+            $manufacturer = $product['manufacturer'];
+        }
+        $productToPush['upc'] = $upc;
+        $productToPush['name'] = $name;
+        $productToPush['description'] = $description;
+        $productToPush['tags'] = $tags;
+        $productToPush['gross'] = $gross;
+        $productToPush['price'] = $price;
+        $productToPush['compare'] = $compare;
+        $productToPush['map'] = $map;
+        $productToPush['manufacturer'] = $manufacturer;
+        $productToPush['image'] = $image;
+
+        return $productToPush;
+    }
+
+    /**
+     * Login with admin creds (not api login but site frontend login)
+     */
+    private static function accountLogin(string $url, string $login, string $password, string $upc, $request)
+    {
+
+        $encodedEmail = urlencode($login);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $cookie = 'cookies.txt';
+        $timeout = 60;
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT,         10);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,  $timeout);
+        curl_setopt($ch, CURLOPT_COOKIEJAR,       $cookie);
+        curl_setopt($ch, CURLOPT_COOKIEFILE,      $cookie);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "email=" . $encodedEmail  . "&password=" . $password);
+        return $ch;
+    }
+
+    public static function logedINSerachProduct($ch, $searchProductUrl)
+    {
+        curl_setopt($ch, CURLOPT_POST, 0);
+        curl_setopt($ch, CURLOPT_URL, $searchProductUrl);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
+
+    private static function parseProductImages($data): array
+    {
+        $html = HtmlDomParser::str_get_html($data);
+        $images = [];
+        $x = 0;
+        foreach ($html->find('.additional-image img') as $e) {
+            $x++;
+            $link =  $e->src;
+            $link = str_replace('80x80', '1100x1100', $link);
+            $new_img = [['src' => $link]];
+            $images =  array_merge($images, $new_img);
+        }
+        return [$x, $images];
+    }
+
+    private static function prpareProductData(int $x, array $images, $product)
+    {
+        if ($x == 0) {
+            return array('product' =>  [
+                'title' => $product['name'], 'body_html' => $product['description'],
+                'vendor' => $product['manufacturer'],  'sku' => $product['upc'],
+                'tags' => $product['tags'], 'images' => [["src" =>  $product['image']]],
+                'product_type' => 'Adult Toys',
+                'variants' => [[
+                    'sku' => $product['upc'], 'fulfillment_service' => 'Manual',
+                    'inventory_management' => 'shopify', 'compare_at_price' =>  $product['compare'],
+                    'price' => $product['map'], 'barcode' => $product['upc']
+                ]]
+            ]);
+        }
+        return array('product' =>  [
+            'title' => $product['name'], 'body_html' => $product['description'],
+            'vendor' => $product['manufacturer'], 'product_type' => 'Adult Toys', 'sku' => $product['upc'],
+            'tags' => $product['tags'], 'images' => $images,
+            'variants' => [[
+                'sku' => $product['upc'], 'fulfillment_service' => 'Manual',
+                'inventory_management' => 'shopify', 'compare_at_price' =>  $product['compare'],
+                'price' => $product['map'],  'barcode' => $product['upc']
+            ]]
+        ]);
+    }
+
+    /**
+     * TEST
+     */
+    private static function fares($encodedEmail, $pass, $upc, $url)
+    {
+        // $url = 'your_url';
+        $cookie = 'cookies.txt';
+        $timeout = 60;
+        $co = new \GuzzleHttp\Cookie\CookieJar();
+        // $co::fromArray(['coockies' => $cookie], '/');
+        // dd($co->toArray());
+        $response = Http::withOptions([
+            'timeout' => $timeout,
+            'cookies' => $co,
+        ])->post($url, [
+            'email' => $encodedEmail,
+            'password' => $pass,
+        ]);
+
+        // Searching for product via UPC
+        $url = 'https://entrenue.com/index.php?route=product/search&search=' . $upc . '&description=true';
+
+        $response = Http::get($url);
+        dd($response->body());
     }
 }

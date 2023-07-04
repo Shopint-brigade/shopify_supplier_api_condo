@@ -1,9 +1,12 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FronEndController;
-use App\Http\Controllers\HoneyController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HoneyController;
+use App\Http\Controllers\FronEndController;
+use App\Http\Controllers\DashboardController;
+
 
 // get shopify location id by name
 // Route::get("/location", [HoneyController::class, 'getShopifyLocationByName']);
@@ -44,9 +47,4 @@ Route::post('/webhook-honey/newproduct', [HoneyController::class, 'receiveShopif
 /**
  * Enterenue
  */
-
-Route::prefix('/admin/enterenue')->group(function() {
-    Route::get('/search', [DashboardController::class, 'enterenueSearchForm'])->name('admin.enterenue.search.form');
-    Route::post('/serach',[DashboardController::class, 'enterenueSearch'] )->name('admin.enterenue.search');
-    Route::get('/push/{upc}', [DashboardController::class, 'enterenuePushProduct'])->name('admin.enterenue.pushProduct');
-});
+include(__DIR__ . '/enterenue_routes.php');

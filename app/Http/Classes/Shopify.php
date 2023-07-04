@@ -210,4 +210,40 @@ class Shopify
             ->put($this->url . '/products/' . $id . '.json', $data);
         return $res->status();
     }
+
+    /**
+     * General method to interact with shopify store
+     * U can provide the method and data and the target url
+     * Use it to handle Admin RestAPI requests
+     */
+    public function makeApiRequest(string $method, string $urlSeg, array $data)
+    {
+        $data_string = json_encode($data);
+        $baseUrl = $this->url;
+        $pattern = '/^https?:\/\/(.*):(.*)@(.*?)\/.*/';
+        preg_match($pattern, $baseUrl, $matches);
+        $key = $matches[1];
+        $secret = $matches[2];
+        $store = $matches[3];
+        $url = 'https://' . $key . ':' . $secret . '@' . $store . '/admin/api/2021-01/' . $urlSeg . '.json';
+        $data_string = json_encode($data);
+        $response = Http::withBasicAuth($key, $secret)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'Content-Length' => strlen($data_string),
+            ])
+            ->{$method}($url, $data);
+        if($response->successful()) {
+            return $response->json();
+        }  else {
+            if ($response->clientError()) {
+                return response()->json(['error' => __('Client error !')]);
+            } elseif ($response->serverError()) {
+                return response()->json(['error' => __('Server error !')]);
+            } else {
+                return response()->json(['error' => __('Something went wrong !')]);
+            }
+        }
+
+    }
 }

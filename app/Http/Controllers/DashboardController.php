@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Classes\EnterenueUtils;
 use App\Http\Classes\HoneyUtils;
 use App\Http\Requests\ImagesSyncRequest;
 use App\Models\Honey;
@@ -113,33 +112,5 @@ class DashboardController extends Controller
     {
         $products = Honey::select('title', 'intID', 'sku', 'stock')->where('imagesSynced', 'yes')->latest()->take(10)->get();
         return view("honey_place.list_products", compact('products'));
-    }
-
-    /**
-     * Enterenue
-     */
-
-    public function enterenueSearchForm()
-    {
-        return view('entrenue.search');
-    }
-
-    public function enterenueSearch(Request $request)
-    {
-        $request->validate([
-            'term' => 'required|min:3'
-        ]);
-
-        $res =  EnterenueUtils::search($request->term);
-        $total = $res['total'];
-        $title = $request->term;
-        $products = $res['data'];
-        // dd($res);
-        return view('entrenue.serach_result', compact(['title', 'total', 'products']));
-    }
-
-    public function enterenuePushProduct(Request $request, string $upc)
-    {
-        return EnterenueUtils::pushProductToShopify($upc);
     }
 }
