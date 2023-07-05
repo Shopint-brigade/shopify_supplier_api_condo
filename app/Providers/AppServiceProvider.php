@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Enterenue;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        View::composer('*', function ($view) {
+            $enterenueDBProductsCount = Enterenue::all()->count();
+            $view->with('enterenueDBProductsCount', $enterenueDBProductsCount);
+        });
     }
 }

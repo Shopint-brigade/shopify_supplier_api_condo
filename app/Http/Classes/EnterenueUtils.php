@@ -2,11 +2,9 @@
 
 namespace App\Http\Classes;
 
+use App\Models\Enterenue;
 use Illuminate\Support\Facades\Http;
 use voku\helper\HtmlDomParser;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Cookie;
-
 
 class EnterenueUtils
 {
@@ -17,7 +15,7 @@ class EnterenueUtils
     {
         try {
             $queryParams = [
-                'email' => env('ENTERENUE_EMAIL'), // 'test@admin.com' 
+                'email' =>  env('ENTERENUE_EMAIL'), // 'test@admin.com' 
                 'apikey' => env('ENTERENUE_KEY'),
                 $paramName => $paramValue,
             ];
@@ -26,7 +24,7 @@ class EnterenueUtils
 
             if ($res->failed()) {
                 info($res->body());
-                $err = new \Exception('Check creds');
+                $err = new \Exception('Check credentials');
                 return ['error' => $err->getMessage(), 'data' => null];
             }
 
@@ -40,6 +38,9 @@ class EnterenueUtils
         }
     }
 
+    /**
+     * Search products by name
+     */
     public static function search(string $term)
     {
         return self::loginGetApiRequest('/products', 'name', $term);
@@ -62,9 +63,7 @@ class EnterenueUtils
         if (is_null($error)) {
             // product to push to shopify store
             $productToPushData = self::PrepareProductToPush($data);
-
             // login
-            // self::fares($login, $password, $upc, $url);
             $ch = self::accountLogin($url, $login, $password, $upc, $request);
             $result = curl_exec($ch);
             // search for product after loged in
@@ -80,7 +79,6 @@ class EnterenueUtils
             $url = $productink;
             curl_setopt($ch, CURLOPT_POST, 0);
             curl_setopt($ch, CURLOPT_URL, $url);
-            $result = curl_exec($ch);
             curl_close($ch);
             // Parse other images(not the main one)
             [$x, $images] = self::parseProductImages($result);
@@ -88,9 +86,13 @@ class EnterenueUtils
             $readyProductToPush = self::prpareProductData($x, $images, $productToPushData);
             // push the ready product to shopify store
             $createdProductResponse = $shopify->makeApiRequest('post', 'products', $readyProductToPush);
+            // init product to be saved in DB
+            $dbProduct = new Enterenue();
             if(isset($createdProduct['error'])) {
                 $theError = $createdProductResponse['error'];
             } 
+            $dbProduct->title = $createdProductResponse['product']['title'];
+            $dbProduct->upc = $upc;
             // posting qty levels
             $inventoryItemId = $createdProductResponse['product']['variants'][0]['inventory_item_id'];
             $quantity = $data['data'][0]['quantity'] - 3;
@@ -99,12 +101,16 @@ class EnterenueUtils
             if(isset($qtyLevelReesult['error'])) {
                 $theError = $createdProductResponse['error'];
             }
+            $dbProduct->qty = $quantity;
             // posting item Gross Cost 
             $data = ['inventory_item' =>  ['inventory_item_id' =>   $inventoryItemId, 'cost' =>  $productToPushData['gross']]];
             $itemCostResponse = $shopify->makeApiRequest('put', 'inventory_items/' . $inventoryItemId, $data);
             if(isset($itemCostResponse['error'])) {
                 $theError = $itemCostResponse['error'];
             }
+            $dbProduct->price =  $productToPushData['price'];
+            // all good ! save in DB
+            $dbProduct->save();
         } else {
             $theError = $error;
         }
@@ -136,9 +142,7 @@ class EnterenueUtils
                 $compare = '';
             }
             $map = $product['map'];
-            if (!empty($map)) {
-                echo '<br/>  MAP ' . $map . ' -- MAP <br/>';
-            } else {
+            if (empty($map)) {
                 $map = $price;
                 if (!empty($product['msrp'])) {
                     if ($map  >=  $product['msrp']) {
@@ -236,31 +240,5 @@ class EnterenueUtils
                 'price' => $product['map'],  'barcode' => $product['upc']
             ]]
         ]);
-    }
-
-    /**
-     * TEST
-     */
-    private static function fares($encodedEmail, $pass, $upc, $url)
-    {
-        // $url = 'your_url';
-        $cookie = 'cookies.txt';
-        $timeout = 60;
-        $co = new \GuzzleHttp\Cookie\CookieJar();
-        // $co::fromArray(['coockies' => $cookie], '/');
-        // dd($co->toArray());
-        $response = Http::withOptions([
-            'timeout' => $timeout,
-            'cookies' => $co,
-        ])->post($url, [
-            'email' => $encodedEmail,
-            'password' => $pass,
-        ]);
-
-        // Searching for product via UPC
-        $url = 'https://entrenue.com/index.php?route=product/search&search=' . $upc . '&description=true';
-
-        $response = Http::get($url);
-        dd($response->body());
     }
 }
