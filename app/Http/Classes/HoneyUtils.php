@@ -73,6 +73,7 @@ class HoneyUtils
                 if ($response->getStatusCode() == HttpResponse::HTTP_OK) {
                     // the response
                     $res = simplexml_load_string((string)$response->getBody());
+                    info('Nart: ' . $res->stock);
                     if (!is_null($res->stock->item)) {
                         // extract needed data from the response
                         $honeySku = $res->stock->item->sku;
