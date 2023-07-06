@@ -13,7 +13,7 @@ use App\Http\Controllers\DashboardController;
 // get shopify collection products
 // Route::get("/products", [HoneyController::class, 'getShopifyProducts']);
 // connect to honey place
-Route::get("/connect", [HoneyController::class, 'connectHoney']);
+// Route::get("/connect", [HoneyController::class, 'connectHoney']);
 // Update the product qty on shopify store
 // Route::get("/update-qty", [HoneyController::class, 'updateQtyOnShopifyStore']);
 // scrap images from honey_place
