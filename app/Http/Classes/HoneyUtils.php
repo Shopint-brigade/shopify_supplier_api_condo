@@ -73,7 +73,8 @@ class HoneyUtils
                 if ($response->getStatusCode() == HttpResponse::HTTP_OK) {
                     // the response
                     $res = simplexml_load_string((string)$response->getBody());
-                    if (!is_null($res->stock->item)) {
+                    // code 501 means: One or more of the submitted products do not exist
+                    if ($res->code != 501 && !is_null($res->stock->item)) {
                         // extract needed data from the response
                         $honeySku = $res->stock->item->sku;
                         $honeyQTY = $res->stock->item->qty - $deleta;

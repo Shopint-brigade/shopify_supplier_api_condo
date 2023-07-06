@@ -13,7 +13,7 @@ use App\Http\Controllers\DashboardController;
 // get shopify collection products
 // Route::get("/products", [HoneyController::class, 'getShopifyProducts']);
 // connect to honey place
-// Route::get("/connect", [HoneyController::class, 'connectHoney']);
+Route::get("/connect", [HoneyController::class, 'connectHoney']);
 // Update the product qty on shopify store
 // Route::get("/update-qty", [HoneyController::class, 'updateQtyOnShopifyStore']);
 // scrap images from honey_place
@@ -30,6 +30,8 @@ Auth::routes();
 // admin routes
 // main page
 Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// products fetched from honey place(no sync with shopify)JUST FOR DEVELOPERS
+// Route::get('/admin/honey-products', [DashboardController::class, 'honeyProducts'])->name('admin.honey.products');
 // logs
 Route::get("/admin/logs", [DashboardController::class, 'logs'])->name('admin.logs');
 // display products added by shopify webhook

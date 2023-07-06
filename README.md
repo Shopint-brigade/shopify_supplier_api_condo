@@ -12,3 +12,7 @@
 # Cron jobs:
 - Feed DB with products from shopify store(Run once)
 - Sync product qty between honey place, DB and shopify store(Interval run)
+
+
+# Enternue # todo
+- Sync product price and stock cron job

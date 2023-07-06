@@ -113,4 +113,11 @@ class DashboardController extends Controller
         $products = Honey::select('title', 'intID', 'sku', 'stock')->where('imagesSynced', 'yes')->latest()->take(10)->get();
         return view("honey_place.list_products", compact('products'));
     }
+
+    public function honeyProducts()
+    {
+        $total = Honey::all()->count();
+        $products = Honey::simplePaginate(20);
+        return view('honey_place.products',compact('products', 'total'));
+    }
 }

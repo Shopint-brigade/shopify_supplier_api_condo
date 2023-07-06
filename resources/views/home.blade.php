@@ -17,6 +17,7 @@
                     @endif
                     <h2 class="bg-secondary text-white p-2 mb-0">{{ __('Honey')}}</h2>
                     <ul class="list-group">
+                        {{-- <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.honey.products') }}">{{ __('Shopify products(all honey products on shopify store)') }}</a></li> --}}
                         <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.logs') }}">{{ __('Logs') }}</a></li>
                         <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.new.products') }}">{{ __('New Products(Created from shopify store)') }}</a></li>
                         <li class="list-group-item"><a class="navbar-brand" href="{{ route('admin.sync.images') }}">{{ __('Sync Product Images') }}</a></li>
