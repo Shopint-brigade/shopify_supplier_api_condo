@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\EnterenueController;
 use App\Http\Controllers\EnterenueDashboardController;
 
 Route::prefix('/admin/enterenue')->group(function() {
@@ -8,3 +10,6 @@ Route::prefix('/admin/enterenue')->group(function() {
     Route::get('/products', [EnterenueDashboardController::class, 'displayPushedProducts'])->name('admin.enterenue.products');
     Route::delete('/products/{product}', [EnterenueDashboardController::class, 'destroy'])->name('admin.enterenue.products.destory');
 });
+
+ // cron job route
+ Route::get("/ent-sync", [EnterenueController::class, 'syncProductPriceAndStock']);
