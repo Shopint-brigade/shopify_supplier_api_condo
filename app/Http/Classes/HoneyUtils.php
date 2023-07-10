@@ -74,6 +74,9 @@ class HoneyUtils
                     // the response
                     $res = simplexml_load_string((string)$response->getBody());
                     if($res) {
+                        echo "<pre>";
+                        var_dump($res->stock->item);
+                        echo "</pre>";
                         if ($res->code != 501 && !is_null($res->stock->item)){
                             // extract needed data from the response
                             $honeySku = $res->stock->item->sku;
@@ -97,8 +100,6 @@ class HoneyUtils
         ]);
         // wait till all promises fulfilled
         $eachPromise->promise()->wait();
-
-        dd("done");
     }
 
     /**
