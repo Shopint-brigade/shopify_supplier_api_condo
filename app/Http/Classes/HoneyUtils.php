@@ -73,18 +73,21 @@ class HoneyUtils
                 if ($response->getStatusCode() == HttpResponse::HTTP_OK) {
                     // the response
                     $res = simplexml_load_string((string)$response->getBody());
-                    if ($res->code != 501 && !is_null($res->stock->item)){
-                        // extract needed data from the response
-                        $honeySku = $res->stock->item->sku;
-                        $honeyQTY = $res->stock->item->qty - $deleta;
-                        // update Honey model(DB) with required data
-                        $product = Honey::where("sku", $honeySku)->first();
-                        if ($product) {
-                            $product->stock = $honeyQTY;
-                            $product->synced_at = Carbon::now();
-                            $product->save();
+                    if($res) {
+                        if ($res->code != 501 && !is_null($res->stock->item)){
+                            // extract needed data from the response
+                            $honeySku = $res->stock->item->sku;
+                            $honeyQTY = $res->stock->item->qty - $deleta;
+                            // update Honey model(DB) with required data
+                            $product = Honey::where("sku", $honeySku)->first();
+                            if ($product) {
+                                $product->stock = $honeyQTY;
+                                $product->synced_at = Carbon::now();
+                                $product->save();
+                            }
                         }
                     }
+                    // echo $res->stock->item . "<br>";
                 }
             },
             'rejected' => function ($reason) {
@@ -94,6 +97,8 @@ class HoneyUtils
         ]);
         // wait till all promises fulfilled
         $eachPromise->promise()->wait();
+
+        dd("done");
     }
 
     /**
