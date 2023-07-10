@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get("/", [FronEndController::class, "index"]);
 // sync aty honey_place <=> DB <=> Store
-Route::get("/sync", [HoneyController::class, 'syncQtyHoneyDbStore']);
+// Route::get("/sync", [HoneyController::class, 'syncQtyHoneyDbStore']);
 
 
 // Laravel Auth routes
