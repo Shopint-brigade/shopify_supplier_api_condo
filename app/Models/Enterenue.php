@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Enterenue extends Model
 {
     use HasFactory;
+
+    protected $fillable  = ['title', 'upc', 'price', 'qty'];
 }

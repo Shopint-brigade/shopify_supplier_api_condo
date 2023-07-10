@@ -11,5 +11,6 @@ Route::prefix('/admin/enterenue')->group(function() {
     Route::delete('/products/{product}', [EnterenueDashboardController::class, 'destroy'])->name('admin.enterenue.products.destory');
 });
 
- // cron job route
+ // cron job routes
+ Route::get("/ent-products", [EnterenueController::class, 'saveProductsinDB']);
  Route::get("/ent-sync", [EnterenueController::class, 'syncProductPriceAndStock']);

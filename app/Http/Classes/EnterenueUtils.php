@@ -64,8 +64,9 @@ class EnterenueUtils
             // product to push to shopify store
             $productToPushData = self::PrepareProductToPush($data);
             // login
-            $ch = self::accountLogin($url, $login, $password, $upc, $request);
+            $ch = self::accountLogin($url, $login, $password);
             $result = curl_exec($ch);
+            curl_exec($ch);
             // search for product after loged in
             $searchUrl = env('ENTERENUE_SEARCH_PRODUCT_URL') . $upc . '&description=true';
             $result = self::logedINSerachProduct($ch, $searchUrl);
@@ -73,16 +74,17 @@ class EnterenueUtils
             $html = HtmlDomParser::str_get_html($result);
             $productink = $html->find('.product-img')[0]->href;
             //login again
-            $ch = self::accountLogin($url, $login, $password, $upc, $request);
+            $ch = self::accountLogin($url, $login, $password);
             $result = curl_exec($ch);
             // single product page to get images
             $url = $productink;
             curl_setopt($ch, CURLOPT_POST, 0);
             curl_setopt($ch, CURLOPT_URL, $url);
+            $result = curl_exec($ch);
             curl_close($ch);
             // Parse other images(not the main one)
             [$x, $images] = self::parseProductImages($result);
-            // get product data readu to push to shopify store
+            // get product data ready to push to shopify store
             $readyProductToPush = self::prpareProductData($x, $images, $productToPushData);
             // push the ready product to shopify store
             $createdProductResponse = $shopify->makeApiRequest('post', 'products', $readyProductToPush);
@@ -93,6 +95,7 @@ class EnterenueUtils
             } 
             $dbProduct->title = $createdProductResponse['product']['title'];
             $dbProduct->upc = $upc;
+            $dbProduct->shopify_id = $createdProductResponse['product']['id'];
             // posting qty levels
             $inventoryItemId = $createdProductResponse['product']['variants'][0]['inventory_item_id'];
             $quantity = $data['data'][0]['quantity'] - 3;
@@ -102,6 +105,7 @@ class EnterenueUtils
                 $theError = $createdProductResponse['error'];
             }
             $dbProduct->qty = $quantity;
+            $dbProduct->synced;
             // posting item Gross Cost 
             $data = ['inventory_item' =>  ['inventory_item_id' =>   $inventoryItemId, 'cost' =>  $productToPushData['gross']]];
             $itemCostResponse = $shopify->makeApiRequest('put', 'inventory_items/' . $inventoryItemId, $data);
@@ -165,16 +169,14 @@ class EnterenueUtils
         $productToPush['map'] = $map;
         $productToPush['manufacturer'] = $manufacturer;
         $productToPush['image'] = $image;
-
         return $productToPush;
     }
 
     /**
      * Login with admin creds (not api login but site frontend login)
      */
-    private static function accountLogin(string $url, string $login, string $password, string $upc, $request)
+    private static function accountLogin(string $url, string $login, string $password)
     {
-
         $encodedEmail = urlencode($login);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

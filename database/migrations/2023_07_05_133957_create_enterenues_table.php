@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('enterenues', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('upc');
+            $table->string('upc'); // or sku
             $table->float('price', 8, 2);
             $table->integer('qty');
+            $table->string('shopify_id');
+            $table->timestamp('synced_at')->nullable();
             $table->timestamps();
         });
     }
