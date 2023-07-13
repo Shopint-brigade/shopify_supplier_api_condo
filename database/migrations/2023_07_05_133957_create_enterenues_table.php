@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('upc'); // or sku
+            // need to make the price and the qty nullable
             $table->float('price', 8, 2);
             $table->integer('qty');
             $table->string('shopify_id');

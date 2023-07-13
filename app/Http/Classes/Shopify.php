@@ -37,9 +37,9 @@ class Shopify
      */
     public function sendGraphQLRequest(string $pass, string $query)
     {
-        // dd($this->url);
-        return Http::withHeaders($this->generateGraphQLHeaders($pass))
-            ->post($this->url . '/graphql.json', ['query' => $query]);
+        $res = Http::withHeaders($this->generateGraphQLHeaders($pass))
+            ->post($this->url . '/graphql.json', ['query' => $query]);    
+        return $res;    
     }
 
     /**
@@ -219,13 +219,11 @@ class Shopify
     public function makeApiRequest(string $method, string $urlSeg, array $data)
     {
         $data_string = json_encode($data);
-        $baseUrl = $this->url;
         $pattern = '/^https?:\/\/(.*):(.*)@(.*?)\/.*/';
-        preg_match($pattern, $baseUrl, $matches);
+        preg_match($pattern, $this->url, $matches);
         $key = $matches[1];
         $secret = $matches[2];
-        $store = $matches[3];
-        $url = 'https://' . $key . ':' . $secret . '@' . $store . '/admin/api/2021-01/' . $urlSeg . '.json';
+        $url = $this->url .'/' . $urlSeg . '.json';
         $data_string = json_encode($data);
         $response = Http::withBasicAuth($key, $secret)
             ->withHeaders([
@@ -245,5 +243,66 @@ class Shopify
             }
         }
 
+    }
+
+    public function getProductsOfCollectionWithPrice(string $pass, $collection_id): array
+    {
+        // initial products
+        $products = [];
+        // cursor for tracking pagination
+        $cursor = null;
+
+        do {
+            $args = [
+                "first: 5"
+            ];
+            if (!empty($cursor)) {
+                $args[] = "after: \"$cursor\"";
+            }
+            $args = implode(', ', $args);
+            $data = "
+                collection(id:\"gid://shopify/Collection/" . $collection_id . "\"){
+                    products(" . $args . "){
+                        pageInfo{
+                            hasNextPage
+                        },
+                        edges{
+                            cursor
+                            node{
+                                id
+                                title
+                                variants(first:1){
+                                    edges{
+                                        node{
+                                            id
+                                            sku
+                                            price
+                                            inventoryQuantity
+                                            inventoryItem{
+                                                id
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }  
+                    }
+                }
+                ";
+            $response = $this->sendGraphQLRequest($pass, $this->graphQL::query($data));
+            if (!empty($response->json()['data']['collection']['products']['edges'])) {
+                $resEdges = $response->json()['data']['collection']['products']['edges'];
+                foreach ($resEdges as $edge) {
+                    $cursor = $edge['cursor'];
+                    $products[] = $edge['node'];
+                }
+            }
+        } while (!is_null($response->json()['data']['collection']) && $response->json()['data']['collection']['products']['pageInfo']['hasNextPage']);
+        return $products;
+    }
+
+    public function setQuantity()
+    {
+        
     }
 }

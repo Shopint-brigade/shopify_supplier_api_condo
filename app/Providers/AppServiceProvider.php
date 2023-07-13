@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view) {
-            $enterenueDBProductsCount = Enterenue::all()->count();
+            $enterenueDBProductsCount = Enterenue::where('pushed', 1)->count();
             $view->with('enterenueDBProductsCount', $enterenueDBProductsCount);
         });
     }

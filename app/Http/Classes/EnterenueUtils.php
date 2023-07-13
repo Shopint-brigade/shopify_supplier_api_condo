@@ -5,6 +5,11 @@ namespace App\Http\Classes;
 use App\Models\Enterenue;
 use Illuminate\Support\Facades\Http;
 use voku\helper\HtmlDomParser;
+use GuzzleHttp\Promise\EachPromise;
+use GuzzleHttp\Psr7\Request as GuzzleRequest;
+use GuzzleHttp\Psr7\Response;
+use  GuzzleHttp\Client;
+use Carbon\Carbon;
 
 class EnterenueUtils
 {
@@ -106,6 +111,7 @@ class EnterenueUtils
             }
             $dbProduct->qty = $quantity;
             $dbProduct->synced;
+            $dbProduct->inventory_item_id = $createdProductResponse['product']['variants'][0]['inventory_item_id'];
             // posting item Gross Cost 
             $data = ['inventory_item' =>  ['inventory_item_id' =>   $inventoryItemId, 'cost' =>  $productToPushData['gross']]];
             $itemCostResponse = $shopify->makeApiRequest('put', 'inventory_items/' . $inventoryItemId, $data);
@@ -113,6 +119,7 @@ class EnterenueUtils
                 $theError = $itemCostResponse['error'];
             }
             $dbProduct->price =  $productToPushData['price'];
+            $dbProduct->pushed = true;
             // all good ! save in DB
             $dbProduct->save();
         } else {
@@ -243,4 +250,31 @@ class EnterenueUtils
             ]]
         ]);
     }
+
+    public static function SaveProductsDB($product, $class)
+    {
+        $upc = $product['variants']['edges'][0]['node']['sku'] ?? '';
+        $variantID = Helpers::getShopifyIntIDFromStr($product['variants']['edges'][0]['node']['id']);
+        // $price = $product['variants']['edges'][0]['node']['price'] ?? 0;
+        // $qty = $product['variants']['edges'][0]['node']['inventoryQuantity'] ?? 0;
+        $invintory_item_id = Helpers::getShopifyIntIDFromStr($product['variants']['edges'][0]['node']['inventoryItem']['id']);
+        $res = $class::updateOrCreate(
+            ['shopify_id' => Helpers::getShopifyIntIDFromStr($product['id'])],
+            [
+                'title' => $product['title'],
+                'upc' => $upc,
+                // 'qty' => $qty,
+                // 'price' => $price,
+                'inventory_item_id' => $invintory_item_id,
+                'variant_id' => $variantID
+            ]
+        );
+        if(!is_null($res)) return "OK";
+        info("Error while saving products in DB");
+    }
+    public static function findProductOnEntrenue(string $upc)
+    {
+        return self::loginGetApiRequest('/products', 'upc', $upc);
+    }
+
 }

@@ -12,7 +12,7 @@ class EnterenueDashboardController extends DashboardController
     public function __construct()
     {
         $this->password = env('FARES_API_TOKEN');
-        $storeUrl = "https://" . env('FARES_API_KEY') . ":" . env('FARES_API_TOKEN') . "@" . env('FARES_STORE') . "/admin/" . env('FARES_API');
+        $storeUrl = "https://" . env('FARES_API_KEY') . ":" . env('FARES_API_TOKEN') . "@" . env('FARES_STORE') . ".myshopify.com/admin/" . env('FARES_API');
         $this->shopify = new Shopify($storeUrl);
     }
 
@@ -61,7 +61,7 @@ class EnterenueDashboardController extends DashboardController
 
     public function displayPushedProducts(Request $request)
     {
-        $products = Enterenue::orderBy('created_at', 'desc')->simplePaginate(10);
+        $products = Enterenue::where('pushed', 1)->orderBy('created_at', 'desc')->simplePaginate(10);
         return view('entrenue.products', compact('products'));
     }
 
@@ -69,5 +69,11 @@ class EnterenueDashboardController extends DashboardController
     {
         $product->delete();
         return redirect()->back()->with('success', __('Product deleted from DB'));
+    }
+
+    public function showAllShopifyProducts()
+    {
+        $products = Enterenue::select(['qty', 'price', 'upc', 'title', 'updated_at'])->simplePaginate(10);
+        return view('entrenue.shopify_products', compact('products'));
     }
 }

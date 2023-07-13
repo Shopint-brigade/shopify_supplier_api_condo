@@ -9,5 +9,14 @@ class Enterenue extends Model
 {
     use HasFactory;
 
-    protected $fillable  = ['title', 'upc', 'price', 'qty'];
+    protected $fillable  = [
+        'title',
+        'upc',
+        'price',
+        'qty',
+        'shopify_id',
+        'inventory_item_id',
+        'synced_at',
+        'variant_id'
+    ];
 }
