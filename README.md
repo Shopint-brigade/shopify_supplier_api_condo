@@ -22,5 +22,13 @@ so we can update it each 2h( if the product exists it will do nothing)
 - syncProductPricekWithShopify: update product price on shopify(run each ? h)
 
 
-# TODO:
-- switch to real store and merge branches
+TODO:
+- switch to real store:
+    - change creds in EnterenueDashboardController and EntrenueController
+    remove all FARES creds stuff
+
+TODO:
+- need to know the time for jobs(need changes in Kernal.php)
+
+TODO:
+- merge branches 
