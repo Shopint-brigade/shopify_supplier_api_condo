@@ -10,6 +10,7 @@ Route::prefix('/admin/enterenue')->group(function() {
     Route::get('/synced-products', [EnterenueDashboardController::class, 'displayPushedProducts'])->name('admin.enterenue.synced.products');
     Route::delete('/products/{product}', [EnterenueDashboardController::class, 'destroy'])->name('admin.enterenue.products.destory');
     Route::get('/products', [EnterenueDashboardController::class, 'showAllShopifyProducts'])->name('admin.enterenue.shopify.products');
+    Route::get('/logs', [EnterenueDashboardController::class, 'logs'])->name('admin.enterenue.logs');
 });
 
  // cron job routes

@@ -24,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             $enterenueDBProductsCount = Enterenue::where('pushed', 1)->count();
             $view->with('enterenueDBProductsCount', $enterenueDBProductsCount);
+            $enterenueShopifyProductsCount = Enterenue::all()->count();
+            $view->with('enterenueShopifyProductsCount', $enterenueShopifyProductsCount);
         });
     }
 }

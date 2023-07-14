@@ -6,6 +6,8 @@ use App\Http\Classes\Shopify;
 use Illuminate\Http\Request;
 use App\Http\Classes\EnterenueUtils;
 use App\Models\Enterenue;
+use Carbon\Carbon;
+
 class EnterenueDashboardController extends DashboardController
 {
     private string $password;
@@ -54,9 +56,9 @@ class EnterenueDashboardController extends DashboardController
         $locationID = $this->shopify->getLocation("Honey's Fulfilment", $this->password);
         $error = EnterenueUtils::pushProductToShopify($upc,$locationID, $request, $this->shopify) ;
         if(is_null($error)) {
-            return redirect()->route('admin.enterenue.products')->with('success', __('Product with upc: '.$upc.' pushed'));
+            return redirect()->route('admin.enterenue.synced.products')->with('success', __('Product with upc: '.$upc.' pushed'));
         }
-        return redirect()->route('admin.enterenue.products')->with('error', $error . " while pushing product with upc: " . $upc);
+        return redirect()->route('admin.enterenue.synced.products')->with('error', $error . " while pushing product with upc: " . $upc);
     }
 
     public function displayPushedProducts(Request $request)
@@ -75,5 +77,22 @@ class EnterenueDashboardController extends DashboardController
     {
         $products = Enterenue::select(['qty', 'price', 'upc', 'title', 'updated_at'])->simplePaginate(10);
         return view('entrenue.shopify_products', compact('products'));
+    }
+
+        /**
+     * Display the last time products updated
+     */
+    public function logs()
+    {
+        $productSynced = false;
+        $syncedDate = null;
+        $prSync = Enterenue::where('synced_at', '!=', null)->orderByDesc('synced_at')->take(1)->get();
+
+        if (!is_null($prSync) && count($prSync) > 0) {
+            $syncedDate = Carbon::parse($prSync[0]->synced_at)->diffForHumans();
+            $productSynced = true;
+        }
+
+        return view("entrenue.logs", ['lastUpdated' => $syncedDate, 'productSynced' => $productSynced]);
     }
 }

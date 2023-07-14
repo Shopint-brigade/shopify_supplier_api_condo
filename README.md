@@ -20,3 +20,7 @@ so we can update it each 2h( if the product exists it will do nothing)
 - syncQtyAndPriceEnternueDB: update DB products price and Qty with data from Enternue(run each ! h)
 - syncProductStockWithShopify: update product qty on shopify(run each ? h)
 - syncProductPricekWithShopify: update product price on shopify(run each ? h)
+
+
+# TODO:
+- change push to shopify route name
