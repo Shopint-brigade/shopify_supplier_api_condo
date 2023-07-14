@@ -64,6 +64,7 @@ class EnterenueController extends Controller
             foreach ($products as $product) {
                 EnterenueUtils::SaveProductsDB($product, Enterenue::class);
             }
+        info("product saved in DB !");    
         } else {
             info("Enternue save products job, products count is: " . count($products) . ' Menas NO products foud');
         }
@@ -91,6 +92,7 @@ class EnterenueController extends Controller
                     $dbPr->qty = $qty;
                     $dbPr->price = $price;
                     $dbPr->save();
+                    info("qty and price updated in DB");
                 } else {
                     info("product with upc: " . $dbPr['upc'] . " not found on Enternue !");
                 }
@@ -112,7 +114,7 @@ class EnterenueController extends Controller
         // product location id
         $locationID = Helpers::getShopifyIntIDFromStr($this->getShopifyLocationByName());
         // get products from DB
-        $dbProducts = Enterenue::all();
+        $dbProducts = Enterenue::where('upc', '!=', '')->get();
         // for each product login and find the product, update the QTY in DB and update the qty on shopify
         $promises = [];
         $client = new Client();
@@ -123,6 +125,8 @@ class EnterenueController extends Controller
                 'inventory_item_id' => $dbPr['inventory_item_id'],
                 'available' => $dbPr['qty'],
             ];
+            // $url = $this->shopify->url . '/inventory_levels/set.json';
+            // EnterenueUtils::updatesingleFieldOnShopifyProduct($dbProducts, $data, $promises, $client, $url, 'POST');
             $data_string = json_encode($data);
                // update the qty on shopify
                $request = new GuzzleRequest(
@@ -164,7 +168,7 @@ class EnterenueController extends Controller
     public function syncProductPricekWithShopify()
     {
         // get products from DB
-        $dbProducts = Enterenue::all();
+        $dbProducts = Enterenue::where('upc', '!=', '')->get();
         // for each product login and find the product, update the price on shopify
         $promises = [];
         $client = new Client();
@@ -215,5 +219,6 @@ class EnterenueController extends Controller
         // all good other code goes here ....
     }
     // TODO
-    // REfactoring: two methods for price and qty need to move to Utils
+    // and test all agian
+    // push to github and merge with main branch
 }

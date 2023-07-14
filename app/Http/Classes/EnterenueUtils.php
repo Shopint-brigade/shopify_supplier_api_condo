@@ -20,7 +20,7 @@ class EnterenueUtils
     {
         try {
             $queryParams = [
-                'email' =>  env('ENTERENUE_EMAIL'), // 'test@admin.com' 
+                'email' =>  env('ENTERENUE_EMAIL'),
                 'apikey' => env('ENTERENUE_KEY'),
                 $paramName => $paramValue,
             ];
@@ -95,9 +95,9 @@ class EnterenueUtils
             $createdProductResponse = $shopify->makeApiRequest('post', 'products', $readyProductToPush);
             // init product to be saved in DB
             $dbProduct = new Enterenue();
-            if(isset($createdProduct['error'])) {
+            if (isset($createdProduct['error'])) {
                 $theError = $createdProductResponse['error'];
-            } 
+            }
             $dbProduct->title = $createdProductResponse['product']['title'];
             $dbProduct->upc = $upc;
             $dbProduct->shopify_id = $createdProductResponse['product']['id'];
@@ -106,7 +106,7 @@ class EnterenueUtils
             $quantity = $data['data'][0]['quantity'] - 3;
             $data = ['location_id' => $itemLocationID, 'inventory_item_id' =>   $createdProductResponse['product']['variants'][0]['inventory_item_id'], 'available' =>  $quantity];
             $qtyLevelResponse = $shopify->makeApiRequest('post', 'inventory_levels/set', $data);
-            if(isset($qtyLevelReesult['error'])) {
+            if (isset($qtyLevelReesult['error'])) {
                 $theError = $createdProductResponse['error'];
             }
             $dbProduct->qty = $quantity;
@@ -115,7 +115,7 @@ class EnterenueUtils
             // posting item Gross Cost 
             $data = ['inventory_item' =>  ['inventory_item_id' =>   $inventoryItemId, 'cost' =>  $productToPushData['gross']]];
             $itemCostResponse = $shopify->makeApiRequest('put', 'inventory_items/' . $inventoryItemId, $data);
-            if(isset($itemCostResponse['error'])) {
+            if (isset($itemCostResponse['error'])) {
                 $theError = $itemCostResponse['error'];
             }
             $dbProduct->price =  $productToPushData['price'];
@@ -255,21 +255,17 @@ class EnterenueUtils
     {
         $upc = $product['variants']['edges'][0]['node']['sku'] ?? '';
         $variantID = Helpers::getShopifyIntIDFromStr($product['variants']['edges'][0]['node']['id']);
-        // $price = $product['variants']['edges'][0]['node']['price'] ?? 0;
-        // $qty = $product['variants']['edges'][0]['node']['inventoryQuantity'] ?? 0;
         $invintory_item_id = Helpers::getShopifyIntIDFromStr($product['variants']['edges'][0]['node']['inventoryItem']['id']);
         $res = $class::updateOrCreate(
             ['shopify_id' => Helpers::getShopifyIntIDFromStr($product['id'])],
             [
                 'title' => $product['title'],
                 'upc' => $upc,
-                // 'qty' => $qty,
-                // 'price' => $price,
                 'inventory_item_id' => $invintory_item_id,
                 'variant_id' => $variantID
             ]
         );
-        if(!is_null($res)) return "OK";
+        if (!is_null($res)) return "OK";
         info("Error while saving products in DB");
     }
     public static function findProductOnEntrenue(string $upc)
@@ -277,4 +273,33 @@ class EnterenueUtils
         return self::loginGetApiRequest('/products', 'upc', $upc);
     }
 
+    /*
+    public static function updatesingleFieldOnShopifyProduct($product, array $data = [], array $promises, $client, string $url, string $method)
+    {
+        $data_string = json_encode($data);
+        $request = new GuzzleRequest(
+            $method,
+            $url,
+            [
+                'Content-Type' => 'application/json',
+                'Content-Length' => strlen($data_string),
+            ],
+            $data_string
+        );
+        $promise = $client->sendAsync($request)->then(
+            // all is good
+            function (Response $response) use ($product) {
+                $product->synced_at = Carbon::now();
+                $product->save();
+                $result = $response->getBody()->getContents();
+                info("Product with title: " . $product . " qty updated");
+            },
+            // error happened
+            function (Exception $exception) {
+                info('Error: ' . $exception->getMessage());
+            }
+        );
+        $promises[] = $promise;
+    }
+    */
 }
