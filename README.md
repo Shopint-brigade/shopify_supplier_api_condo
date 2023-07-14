@@ -23,4 +23,4 @@ so we can update it each 2h( if the product exists it will do nothing)
 
 
 # TODO:
-- change push to shopify route name
+- switch to real store and merge branches

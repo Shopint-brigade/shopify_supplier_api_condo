@@ -57,8 +57,9 @@ class EnterenueController extends Controller
      * to be used for sync products on Shopify
      * WILL use as cron job(LATER) and run each 2 hours
      */
-    public function saveProductsinDB(Request $request)
+    public function saveProductsinDB()
     {
+        info("product saved");
         $products = $this->shopify->getProductsOfCollectionWithPrice($this->password, $this->collection_id);
         if (count($products) > 0) {
             foreach ($products as $product) {
@@ -98,7 +99,6 @@ class EnterenueController extends Controller
                 }
             }
         }
-        return "success";
     }
 
 
@@ -218,7 +218,4 @@ class EnterenueController extends Controller
         $eachPromise->promise()->wait();
         // all good other code goes here ....
     }
-    // TODO
-    // and test all agian
-    // push to github and merge with main branch
 }

@@ -14,7 +14,7 @@ Route::prefix('/admin/enterenue')->group(function() {
 });
 
  // cron job routes
- Route::get("/ent-products", [EnterenueController::class, 'saveProductsinDB']);
- Route::get("/sync-qty-price-db", [EnterenueController::class, 'syncQtyAndPriceEnternueDB']);
- Route::get("/ent-sync-qty", [EnterenueController::class, 'syncProductStockWithShopify']);
- Route::get("/ent-sync-price", [EnterenueController::class, 'syncProductPricekWithShopify']);
+//  Route::get("/ent-products", [EnterenueController::class, 'saveProductsinDB']);
+//  Route::get("/sync-qty-price-db", [EnterenueController::class, 'syncQtyAndPriceEnternueDB']);
+//  Route::get("/ent-sync-qty", [EnterenueController::class, 'syncProductStockWithShopify']);
+//  Route::get("/ent-sync-price", [EnterenueController::class, 'syncProductPricekWithShopify']);
