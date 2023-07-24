@@ -13,7 +13,8 @@ class EnterenueDashboardController extends DashboardController
     private string $password;
     public function __construct()
     {
-        $this->password = env('FARES_API_TOKEN');
+        $this->password = env('FARES_API_TOKEN'); //env('FARES_API_TOKEN');ENTERENUE_SHOPIFY_SECRET
+        // $storeUrl = "https://" . env('ENTERENUE_SHOPIFY_KEY') . ":" . env('ENTERENUE_SHOPIFY_SECRET') . "@" . env('ENTERENUE_SHOPIFY_STORE') . ".myshopify.com/admin/" . env('ENTERENUE_SHOPIFY_API');
         $storeUrl = "https://" . env('FARES_API_KEY') . ":" . env('FARES_API_TOKEN') . "@" . env('FARES_STORE') . ".myshopify.com/admin/" . env('FARES_API');
         $this->shopify = new Shopify($storeUrl);
     }
@@ -89,7 +90,7 @@ class EnterenueDashboardController extends DashboardController
         $prSync = Enterenue::where('synced_at', '!=', null)->orderByDesc('synced_at')->take(1)->get();
 
         if (!is_null($prSync) && count($prSync) > 0) {
-            $syncedDate = Carbon::parse($prSync[0]->synced_at)->diffForHumans();
+            $syncedDate = Carbon::parse($prSync[0]->synced_at);
             $productSynced = true;
         }
 

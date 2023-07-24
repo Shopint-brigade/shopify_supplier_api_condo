@@ -19,7 +19,7 @@ class EnterenueShopifyInitProducts extends Command
      *
      * @var string
      */
-    protected $description = 'Get all product fro shopify store and save in DB(price and qty are null)';
+    protected $description = 'Get all product from shopify store and save in DB(price and qty are null)';
 
     /**
      * Execute the console command.

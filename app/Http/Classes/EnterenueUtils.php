@@ -253,7 +253,7 @@ class EnterenueUtils
 
     public static function SaveProductsDB($product, $class)
     {
-        $upc = $product['variants']['edges'][0]['node']['sku'] ?? '';
+        $upc = $product['variants']['edges'][0]['node']['barcode'] ?? '';
         $variantID = Helpers::getShopifyIntIDFromStr($product['variants']['edges'][0]['node']['id']);
         $invintory_item_id = Helpers::getShopifyIntIDFromStr($product['variants']['edges'][0]['node']['inventoryItem']['id']);
         $res = $class::updateOrCreate(

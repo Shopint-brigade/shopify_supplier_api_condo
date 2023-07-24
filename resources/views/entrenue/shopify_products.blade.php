@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
     <div class="row justify-content-center mt-4">
-        <div class="col-8">
+        <div class="col-10">
             <h1 class="text-center mb-5">{{ __('Products from Shopify') }}</h1>
             @if (count($products) !== 0)
                 <table class="table">
@@ -11,7 +11,7 @@
                             <th scope="col">{{ __('SKU(UPC)') }}</th>
                             <th scope="col">{{ __('Price') }}</th>
                             <th scope="col">{{ __('Quqntity') }}</th>
-                            <th scope="col">{{ __('Sync Date') }}</th>
+                            <th scope="col">{{ __('Update Date') }}</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -49,7 +49,7 @@
                                             target='_blank' class='text-success fw-bold'>{{ __('Push to Shopify') }}</a>
                                     @else
                                         <span
-                                            class="fs-6 p-2 badge text-bg-success text-white">{{ __('Already pushed !') }}</span>
+                                            class="fs-6 p-2 badge text-bg-success text-white">{{ __('Already on shopify !') }}</span>
                                     @endif
                                 </td>
                             </tr>

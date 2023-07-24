@@ -275,7 +275,7 @@ class Shopify
                                     edges{
                                         node{
                                             id
-                                            sku
+                                            barcode
                                             price
                                             inventoryQuantity
                                             inventoryItem{
