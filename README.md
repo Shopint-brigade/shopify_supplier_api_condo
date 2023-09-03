@@ -23,6 +23,10 @@ so we can update it each 2h( if the product exists it will do nothing)
 
 
 TODO:
+- change the locatioin name in enterenuePushProduct method on EntrenueDashboardController
+line 57
+
+TODO:
 - switch to real store:
     - change creds in EnterenueDashboardController, remove all FARES creds stuff
 
@@ -31,3 +35,30 @@ TODO:
 
 TODO:
 - merge branches 
+
+// good product Exsens Lubricant 70ml - Appletini
+
+price, compare at price => at varianlt level
+qty and cost at invintory level
+
+// $gross = $product['price'];
+            // $price = $product['price'] * 2;
+            // $compare = $price * 0.2;
+            // $compare = $compare + $price;
+            // if (!empty($product['msrp'])) {
+            //     $compare = $product['msrp'];
+            // } else {
+            //     $compare = '';
+            // }
+            // $map = $product['map'];
+            // if (empty($map)) {
+            //     $map = $price;
+            //     if (!empty($product['msrp'])) {
+            //         if ($map  >=  $product['msrp']) {
+            //             $map = $product['msrp'];
+            //         }
+            //     }
+            // }
+            // if ($map == $compare) {
+            //     $compare = '';
+            // }

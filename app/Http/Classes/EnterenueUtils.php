@@ -5,11 +5,7 @@ namespace App\Http\Classes;
 use App\Models\Enterenue;
 use Illuminate\Support\Facades\Http;
 use voku\helper\HtmlDomParser;
-use GuzzleHttp\Promise\EachPromise;
-use GuzzleHttp\Psr7\Request as GuzzleRequest;
-use GuzzleHttp\Psr7\Response;
-use  GuzzleHttp\Client;
-use Carbon\Carbon;
+
 
 class EnterenueUtils
 {
@@ -100,6 +96,9 @@ class EnterenueUtils
             }
             $dbProduct->title = $createdProductResponse['product']['title'];
             $dbProduct->upc = $upc;
+            $dbProduct->variant_id = $createdProductResponse['product']['variants'][0]['id'];
+            $dbProduct->map = $productToPushData['map'];
+            $dbProduct->msrp = $productToPushData['msrp'];
             $dbProduct->shopify_id = $createdProductResponse['product']['id'];
             // posting qty levels
             $inventoryItemId = $createdProductResponse['product']['variants'][0]['inventory_item_id'];
@@ -120,6 +119,7 @@ class EnterenueUtils
             }
             $dbProduct->price =  $productToPushData['price'];
             $dbProduct->pushed = true;
+
             // all good ! save in DB
             $dbProduct->save();
         } else {
@@ -134,6 +134,7 @@ class EnterenueUtils
      */
     private static function PrepareProductToPush(array $data): array
     {
+        // dd($data);
         $productToPush = null;
         foreach ($data['data'] as $product) {
             $upc = $product['upc'];
@@ -143,27 +144,13 @@ class EnterenueUtils
             $description = preg_replace('/<[^>]*>/', ' ', $description);
             $description = html_entity_decode($description);
             $tags = $product['categories'] . ',entrenue';
-            $gross = $product['price'];
-            $price = $product['price'] * 2;
-            $compare = $price * 0.2;
-            $compare = $compare + $price;
-            if (!empty($product['msrp'])) {
-                $compare = $product['msrp'];
-            } else {
-                $compare = '';
-            }
-            $map = $product['map'];
-            if (empty($map)) {
-                $map = $price;
-                if (!empty($product['msrp'])) {
-                    if ($map  >=  $product['msrp']) {
-                        $map = $product['msrp'];
-                    }
-                }
-            }
-            if ($map == $compare) {
-                $compare = '';
-            }
+            
+            $dataPrices = self::calculatePriceMapMsrp($product);
+            $gross = $dataPrices['gross'];
+            $price = $dataPrices['price'];
+            $compare = $dataPrices['compare'];
+            $map = $dataPrices['map'];
+            $msrp = $product['msrp'] ;
             $manufacturer = $product['manufacturer'];
         }
         $productToPush['upc'] = $upc;
@@ -174,6 +161,7 @@ class EnterenueUtils
         $productToPush['price'] = $price;
         $productToPush['compare'] = $compare;
         $productToPush['map'] = $map;
+        $productToPush['msrp'] = $msrp;
         $productToPush['manufacturer'] = $manufacturer;
         $productToPush['image'] = $image;
         return $productToPush;
@@ -273,33 +261,32 @@ class EnterenueUtils
         return self::loginGetApiRequest('/products', 'upc', $upc);
     }
 
-    /*
-    public static function updatesingleFieldOnShopifyProduct($product, array $data = [], array $promises, $client, string $url, string $method)
+    /**
+     * calcualte the compare price , map, gross and the price
+     */
+    public static function calculatePriceMapMsrp($product)
     {
-        $data_string = json_encode($data);
-        $request = new GuzzleRequest(
-            $method,
-            $url,
-            [
-                'Content-Type' => 'application/json',
-                'Content-Length' => strlen($data_string),
-            ],
-            $data_string
-        );
-        $promise = $client->sendAsync($request)->then(
-            // all is good
-            function (Response $response) use ($product) {
-                $product->synced_at = Carbon::now();
-                $product->save();
-                $result = $response->getBody()->getContents();
-                info("Product with title: " . $product . " qty updated");
-            },
-            // error happened
-            function (Exception $exception) {
-                info('Error: ' . $exception->getMessage());
+        $gross = $product['price'];
+        $price = $product['price'] * 2;
+        $compare = $price * 0.2;
+        $compare = $compare + $price;
+        if (!empty($product['msrp'])) {
+            $compare = $product['msrp'];
+        } else {
+            $compare = '';
+        }
+        $map = $product['map'];
+        if (empty($map)) {
+            $map = $price;
+            if (!empty($product['msrp'])) {
+                if ($map  >=  $product['msrp']) {
+                    $map = $product['msrp'];
+                }
             }
-        );
-        $promises[] = $promise;
+        }
+        if ($map == $compare) {
+            $compare = '';
+        }
+        return ['gross' => $gross, 'price' => $price, 'compare' => $compare, 'map' => $map];
     }
-    */
 }

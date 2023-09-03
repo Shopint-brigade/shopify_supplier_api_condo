@@ -69,7 +69,7 @@ class EnterenueController extends Controller
     }
 
     /**
-     * Use as cron job to update the Qty and the Price from Enternue on Db
+     * Use as cron job to update the Qty and the Price(msrp, map) from Enternue on Db
      * then we can use the DB as cache to update the qty and the price on
      * shopify.
      */
@@ -86,9 +86,13 @@ class EnterenueController extends Controller
                 if (!empty($entrenueResponse['data']['data'])) {
                     $qty = intval($entrenueResponse['data']['data'][0]['quantity']) - 3;
                     $price = $entrenueResponse['data']['data'][0]['price'];
+                    $msrp = $entrenueResponse['data']['data'][0]['msrp'];
+                    $map = $entrenueResponse['data']['data'][0]['map'];
                     // update qty on DB
                     $dbPr->qty = $qty;
                     $dbPr->price = $price;
+                    $dbPr->msrp = $msrp;
+                    $dbPr->map = $map;
                     $dbPr->save();
                     info("qty and price updated in DB");
                 } else {
@@ -145,7 +149,7 @@ class EnterenueController extends Controller
             },
             'rejected' => function ($reason) {
                 // handle promise rejected here
-                info($reason);
+                info($reason->getMessage());
             }
         ]);
         $eachPromise->promise()->wait();
@@ -171,15 +175,18 @@ class EnterenueController extends Controller
         $client = new Client();
         $promises = (function () use ($client, $dbProducts, $baseUrl) {
             foreach ($dbProducts as $dbPr) {
-                usleep(500000);
+                usleep(1100000);
                 if (!is_null($dbPr['price'])) {
+                    $pricesData = EnterenueUtils::calculatePriceMapMsrp($dbPr);
+                    
                     $data = [
                         'product' => [
                             'id' => $dbPr['shopify_id'],
                             'variants' => [
                                 [
                                     'id' => $dbPr['variant_id'],
-                                    'price' => $dbPr['price'],
+                                    'price' => $pricesData['map'],
+                                    'compare_at_price' => $pricesData['compare']
                                 ],
                             ],
                         ]
@@ -195,18 +202,32 @@ class EnterenueController extends Controller
                         $data_string
                     );
                     yield $client->sendAsync($request);
+                    $costData = [
+                        'inventory_item' =>  ['inventory_item_id' =>   $dbPr['inventory_item_id'], 'cost' =>  $dbPr['price']]
+                    ];
+                    $costDataStaring = json_encode($costData);
+                    $costRequest = new GuzzleRequest(
+                        'PUT',
+                        $baseUrl . '/inventory_items/' . $dbPr['inventory_item_id'] . '.json',
+                        [
+                            'Content-Type' => 'application/json',
+                            'Content-Length' => strlen($costDataStaring),
+                        ],
+                        $costDataStaring
+                    );
+                    yield $client->sendAsync($costRequest);
                 }
             }
         })();
 
         $eachPromise = new EachPromise($promises, [
-            'concurrency' => 10,
+            'concurrency' => 20,
             'fulfilled' => function (Response $response) {
                 info($response->getStatusCode());
             },
             'rejected' => function ($reason) {
                 // handle promise rejected here
-                info($reason);
+                info($reason->getMessage());
             }
         ]);
 

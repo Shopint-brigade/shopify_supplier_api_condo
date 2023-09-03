@@ -10,6 +10,8 @@
                             <th scope="col">{{ __('Name') }}</th>
                             <th scope="col">{{ __('SKU(UPC)') }}</th>
                             <th scope="col">{{ __('Price') }}</th>
+                            <th scope="col">{{ __('MSRP') }}</th>
+                            <th scope="col">{{ __('MAP') }}</th>
                             <th scope="col">{{ __('Quqntity') }}</th>
                             <th scope="col">{{ __('Update Date') }}</th>
                         </tr>
@@ -20,6 +22,8 @@
                                 <th>{{ $product->title }}</th>
                                 <td>{{ $product->upc }}</td>
                                 <td>{{ $product->price }}</td>
+                                <td>{{ $product->msrp }}</td>
+                                <td>{{ $product->map }}</td>
                                 <td>{{ $product->qty }}</td>
                                 <td>{{ $product->updated_at->diffForHumans() }}</td>
                             </tr>

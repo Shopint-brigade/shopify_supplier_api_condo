@@ -19,6 +19,7 @@
                             <th>{{ __('Available') }}</th>
                             <th>{{ __('Price') }}</th>
                             <th>{{ __('MSRP') }}</th>
+                            <th>{{ __('MAP') }}</th>
                             <th colspan='2' class='text-center'>Actions</th>
                         </tr>
                     </thead>
@@ -39,6 +40,7 @@
                                 <td class='align-middle'>{{ $product['quantity'] }}</td>
                                 <td class='align-middle'>{{ $product['price'] }}</td>
                                 <td class='align-middle'>{{ $product['msrp'] }}</td>
+                                <td class='align-middle'>{{ $product['map'] }}</td>
                                 <td class='align-middle'>
                                     <button type="button" class="btn-close close-product" data-bs-dismiss="alert"
                                         aria-label="Close"></button>

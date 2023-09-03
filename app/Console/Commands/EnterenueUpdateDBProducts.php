@@ -19,7 +19,7 @@ class EnterenueUpdateDBProducts extends Command
      *
      * @var string
      */
-    protected $description = 'Update all products qty and price on DB with data from Enternue site';
+    protected $description = 'Update all products qty and price, msrp and map on DB with data from Enternue site';
 
     /**
      * Execute the console command.
