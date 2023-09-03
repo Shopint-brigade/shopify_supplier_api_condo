@@ -289,9 +289,8 @@ class Shopify
                     }
                 }
                 ";
-                
             $response = $this->sendGraphQLRequest($pass, $this->graphQL::query($data));
-            info($response->json());
+            info($response->status());
             if (!empty($response->json()['data']['collection']['products']['edges'])) {
                 $resEdges = $response->json()['data']['collection']['products']['edges'];
                 foreach ($resEdges as $edge) {
