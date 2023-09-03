@@ -1,9 +1,12 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\FronEndController;
-use App\Http\Controllers\HoneyController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HoneyController;
+use App\Http\Controllers\FronEndController;
+use App\Http\Controllers\DashboardController;
+
 
 // get shopify location id by name
 // Route::get("/location", [HoneyController::class, 'getShopifyLocationByName']);
@@ -27,6 +30,8 @@ Auth::routes();
 // admin routes
 // main page
 Route::get('/admin', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// products fetched from honey place(no sync with shopify)JUST FOR DEVELOPERS
+// Route::get('/admin/honey-products', [DashboardController::class, 'honeyProducts'])->name('admin.honey.products');
 // logs
 Route::get("/admin/logs", [DashboardController::class, 'logs'])->name('admin.logs');
 // display products added by shopify webhook
@@ -41,3 +46,7 @@ Route::get('/admin/synced-products-images', [DashboardController::class, 'displa
 Route::post('/webhook-honey/newproduct', [HoneyController::class, 'receiveShopifyWebhookNewProduct']);
 
 
+/**
+ * Enterenue
+ */
+include(__DIR__ . '/enterenue_routes.php');

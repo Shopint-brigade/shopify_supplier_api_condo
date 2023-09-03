@@ -24,6 +24,7 @@
             </div>
             <div class="mb-3">
                 <label for="ptoductID" class="form-label">Shopiyfy products <b>({{count($products)}})</b></label>
+                 <div class="form-text fw-semibold text-dark">{{__('You can search product is or name.')}}</div>
                 <input name="search" type="text" id="product-search" class="form-control" data-url="{{ route('admin.product.search') }}">
                 <input type="hidden" id="product_id" name="product_id">
             </div>

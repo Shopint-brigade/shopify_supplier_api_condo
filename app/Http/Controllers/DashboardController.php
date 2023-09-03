@@ -39,7 +39,7 @@ class DashboardController extends Controller
     {
         $productSynced = false;
         $syncedDate = null;
-        if (!is_null(Honey::first()->synced_at)) {
+        if (!is_null(Honey::first()) && !is_null(Honey::first()->synced_at)) {
             $syncedDate = Carbon::parse(Honey::first()->synced_at)->toDayDateTimeString();
             $productSynced = true;
         }
@@ -74,7 +74,7 @@ class DashboardController extends Controller
     {
         $search = $request->get('search');
         $products = Honey::select('title', 'intID')->where('title', 'like', '%' . $search . '%')
-        ->orWhere('intID', 'like', '%' . $search . '%')->get();
+            ->orWhere('intID', 'like', '%' . $search . '%')->get();
         return response()->json($products);
     }
 
@@ -112,5 +112,12 @@ class DashboardController extends Controller
     {
         $products = Honey::select('title', 'intID', 'sku', 'stock')->where('imagesSynced', 'yes')->latest()->take(10)->get();
         return view("honey_place.list_products", compact('products'));
+    }
+
+    public function honeyProducts()
+    {
+        $total = Honey::all()->count();
+        $products = Honey::simplePaginate(20);
+        return view('honey_place.products',compact('products', 'total'));
     }
 }

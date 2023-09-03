@@ -37,9 +37,9 @@ class Shopify
      */
     public function sendGraphQLRequest(string $pass, string $query)
     {
-        // dd($this->url);
-        return Http::withHeaders($this->generateGraphQLHeaders($pass))
-            ->post($this->url . '/graphql.json', ['query' => $query]);
+        $res = Http::withHeaders($this->generateGraphQLHeaders($pass))
+            ->post($this->url . '/graphql.json', ['query' => $query]);    
+        return $res;    
     }
 
     /**
@@ -209,5 +209,100 @@ class Shopify
         $res = Http::withHeaders($headers)
             ->put($this->url . '/products/' . $id . '.json', $data);
         return $res->status();
+    }
+
+    /**
+     * General method to interact with shopify store
+     * U can provide the method and data and the target url
+     * Use it to handle Admin RestAPI requests
+     */
+    public function makeApiRequest(string $method, string $urlSeg, array $data)
+    {
+        $data_string = json_encode($data);
+        $pattern = '/^https?:\/\/(.*):(.*)@(.*?)\/.*/';
+        preg_match($pattern, $this->url, $matches);
+        $key = $matches[1];
+        $secret = $matches[2];
+        $url = $this->url .'/' . $urlSeg . '.json';
+        $data_string = json_encode($data);
+        $response = Http::withBasicAuth($key, $secret)
+            ->withHeaders([
+                'Content-Type' => 'application/json',
+                'Content-Length' => strlen($data_string),
+            ])
+            ->{$method}($url, $data);
+        if($response->successful()) {
+            return $response->json();
+        }  else {
+            if ($response->clientError()) {
+                return response()->json(['error' => __('Client error !')]);
+            } elseif ($response->serverError()) {
+                return response()->json(['error' => __('Server error !')]);
+            } else {
+                return response()->json(['error' => __('Something went wrong !')]);
+            }
+        }
+
+    }
+
+    public function getProductsOfCollectionWithPrice(string $pass, $collection_id): array
+    {
+        // initial products
+        $products = [];
+        // cursor for tracking pagination
+        $cursor = null;
+
+        do {
+            $args = [
+                "first: 5"
+            ];
+            if (!empty($cursor)) {
+                $args[] = "after: \"$cursor\"";
+            }
+            $args = implode(', ', $args);
+            $data = "
+                collection(id:\"gid://shopify/Collection/" . $collection_id . "\"){
+                    products(" . $args . "){
+                        pageInfo{
+                            hasNextPage
+                        },
+                        edges{
+                            cursor
+                            node{
+                                id
+                                title
+                                variants(first:1){
+                                    edges{
+                                        node{
+                                            id
+                                            barcode
+                                            price
+                                            inventoryQuantity
+                                            inventoryItem{
+                                                id
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }  
+                    }
+                }
+                ";
+            $response = $this->sendGraphQLRequest($pass, $this->graphQL::query($data));
+            if (!empty($response->json()['data']['collection']['products']['edges'])) {
+                $resEdges = $response->json()['data']['collection']['products']['edges'];
+                foreach ($resEdges as $edge) {
+                    $cursor = $edge['cursor'];
+                    $products[] = $edge['node'];
+                }
+            }
+        } while (!is_null($response->json()['data']['collection']) && $response->json()['data']['collection']['products']['pageInfo']['hasNextPage']);
+        return $products;
+    }
+
+    public function setQuantity()
+    {
+        
     }
 }

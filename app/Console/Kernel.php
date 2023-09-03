@@ -12,8 +12,23 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        ////////////////
+        // HONEY 
+        ///////////////
         // update qty in DB and store with the qty from honey
         $schedule->command('honey:sync-honey-db-shopify')->everyTwoHours();
+
+        ////////////////
+        // Entrenue 
+        ///////////////
+        //get all products from Enternue shopify store and save in DB
+        $schedule->command('enterenue:shopify-init-products')->everyTwoHours();
+        // update DB products qty and price with data from Enternue
+        $schedule->command('enterenue:update-db-products')->everyOddHour();
+        // update(sync) product qty on shopify
+        $schedule->command('enterenue:shopify-sync-stock')->everyThirtyMinutes();
+        // update(sync) product price on shopify
+        $schedule->command('enterenue:shopify-sync-price')->everyThirtyMinutes();
     }
 
     /**
