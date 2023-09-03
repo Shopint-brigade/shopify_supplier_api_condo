@@ -13,9 +13,9 @@ class EnterenueDashboardController extends DashboardController
     private string $password;
     public function __construct()
     {
-        $this->password = env('FARES_API_TOKEN'); //env('FARES_API_TOKEN');ENTERENUE_SHOPIFY_SECRET
+        $this->password = env('ENTERENUE_SHOPIFY_SECRET'); //env('FARES_API_TOKEN');ENTERENUE_SHOPIFY_SECRET
         // $storeUrl = "https://" . env('ENTERENUE_SHOPIFY_KEY') . ":" . env('ENTERENUE_SHOPIFY_SECRET') . "@" . env('ENTERENUE_SHOPIFY_STORE') . ".myshopify.com/admin/" . env('ENTERENUE_SHOPIFY_API');
-        $storeUrl = "https://" . env('FARES_API_KEY') . ":" . env('FARES_API_TOKEN') . "@" . env('FARES_STORE') . ".myshopify.com/admin/" . env('FARES_API');
+        $storeUrl = "https://" . env('ENTERENUE_SHOPIFY_KEY') . ":" . env('ENTERENUE_SHOPIFY_SECRET') . "@" . env('ENTERENUE_SHOPIFY_STORE') . ".myshopify.com/admin/" . env('ENTERENUE_SHOPIFY_API');
         $this->shopify = new Shopify($storeUrl);
     }
 
@@ -54,7 +54,7 @@ class EnterenueDashboardController extends DashboardController
 
     public function enterenuePushProduct(Request $request, string $upc)
     {
-        $locationID = $this->shopify->getLocation("Honey's Fulfilment", $this->password);
+        $locationID = $this->shopify->getLocation("ENTRENUE", $this->password);
         $error = EnterenueUtils::pushProductToShopify($upc,$locationID, $request, $this->shopify) ;
         if(is_null($error)) {
             return redirect()->route('admin.enterenue.synced.products')->with('success', __('Product with upc: '.$upc.' pushed'));

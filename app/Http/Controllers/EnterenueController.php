@@ -34,12 +34,12 @@ class EnterenueController extends Controller
      */
     public function __construct()
     {
-        $this->username =  env('FARES_API_KEY'); // env('FARES_API_KEY');ENTERENUE_SHOPIFY_KEY
-        $this->password = env('FARES_API_TOKEN'); // env('FARES_API_TOKEN');ENTERENUE_SHOPIFY_SECRET
-        $this->shop = env('FARES_STORE'); //env('FARES_STORE');ENTERENUE_SHOPIFY_STORE
-        $this->api = env('FARES_API'); //env('FARES_API');ENTERENUE_SHOPIFY_API
-        $this->location_name = env('FARES_LOCATION_NAME'); //env('FARES_LOCATION_NAME');ENTRENUE_LOCATION_NAME
-        $this->collection_id = env('FARES_COLLECTION_ID'); //env('FARES_COLLECTION_ID');ENTRENUE_COLLECTION_ID
+        $this->username =  env('ENTERENUE_SHOPIFY_KEY'); // env('FARES_API_KEY');ENTERENUE_SHOPIFY_KEY
+        $this->password = env('ENTERENUE_SHOPIFY_SECRET'); // env('FARES_API_TOKEN');ENTERENUE_SHOPIFY_SECRET
+        $this->shop = env('ENTERENUE_SHOPIFY_STORE'); //env('FARES_STORE');ENTERENUE_SHOPIFY_STORE
+        $this->api = env('ENTERENUE_SHOPIFY_API'); //env('FARES_API');ENTERENUE_SHOPIFY_API
+        $this->location_name = env('ENTRENUE_LOCATION_NAME'); //env('FARES_LOCATION_NAME');ENTRENUE_LOCATION_NAME
+        $this->collection_id = env('ENTRENUE_COLLECTION_ID'); //env('FARES_COLLECTION_ID');ENTRENUE_COLLECTION_ID
         $this->honey_account = env('HONEY_ACCOUNT');
         $this->honey_password = env("HONEY_PASSWORD");
         $this->shopify = new Shopify('https://' . $this->username . ':' . $this->password . '@' . $this->shop . '.myshopify.com/admin/' . $this->api);

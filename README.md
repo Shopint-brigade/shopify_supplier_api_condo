@@ -22,7 +22,7 @@ so we can update it each 2h( if the product exists it will do nothing)
 - syncProductPricekWithShopify: update product price on shopify(run each ? h)
 
 
-TODO:
+
 - change the locatioin name in enterenuePushProduct method on EntrenueDashboardController
 line 57
 
