@@ -88,6 +88,7 @@ class DashboardController extends Controller
         $shopifyProductID = $request->input('product_id');
         // scrap product images from honey
         $honeyProductImages = HoneyUtils::parsingProductImages($honeyProductUrl);
+        info($honeyProductImages);
         // if we have images
         if (count($honeyProductImages) > 0) {
             // update shopify prtoduct images and get back the response status  
