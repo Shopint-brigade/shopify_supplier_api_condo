@@ -70,7 +70,7 @@ class Shopify
     {
         if($locationName == "Honey's Place") {
             return 62089232584;
-        }
+        } else {
         $itemLocationId = "";
         $data = "
             locations(first:" . $first . "){
@@ -93,6 +93,7 @@ class Shopify
             }
         }
         return $itemLocationId;
+    }
     }
 
     /**
