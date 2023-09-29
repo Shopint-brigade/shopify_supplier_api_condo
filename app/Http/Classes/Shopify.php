@@ -211,7 +211,8 @@ class Shopify
         // send the update request
         $jsonData = json_encode($data);
         $res = Http::withHeaders($headers)
-            ->put($this->url . '/products/' . $id . '.json', $data);
+            ->put($this->url . '/products/' . $id . '.json', $jsonData);
+            info($res->status());
         return $res->status();
     }
 
