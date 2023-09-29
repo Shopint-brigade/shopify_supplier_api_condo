@@ -298,7 +298,7 @@ class Shopify
                     $products[] = $edge['node'];
                 }
             }
-        } while (!is_null($response->json()['data']['collection']) && $response->json()['data']['collection']['products']['pageInfo']['hasNextPage']);
+        } while (!is_null($response->json()) && !is_null($response->json()['data']['collection']) && $response->json()['data']['collection']['products']['pageInfo']['hasNextPage']);
         return $products;
     }
 
