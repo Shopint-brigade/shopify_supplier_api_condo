@@ -274,7 +274,10 @@ class Shopify
                                 variants(first:1){
                                     edges{
                                         node{
-                                
+                                            id
+                                            barcode
+                                            price
+                                            inventoryQuantity
                                             inventoryItem{
                                                 id
                                             }
@@ -295,7 +298,11 @@ class Shopify
                     $products[] = $edge['node'];
                 }
             }
-        } while (!is_null($response->json()) && !is_null($response->json()['data']['collection']) && $response->json()['data']['collection']['products']['pageInfo']['hasNextPage']);
+        } while (    !is_null($response->json()) && // Check if the response is not null
+        isset($response->json()['data']) && // Check if 'data' key exists
+        isset($response->json()['data']['collection']) && // Check if 'collection' key exists
+        isset($response->json()['data']['collection']['products']['pageInfo']['hasNextPage']) // Check if 'hasNextPage' key exists
+    );
         return $products;
     }
 
