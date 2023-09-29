@@ -274,10 +274,7 @@ class Shopify
                                 variants(first:1){
                                     edges{
                                         node{
-                                            id
-                                            barcode
-                                            price
-                                            inventoryQuantity
+                                
                                             inventoryItem{
                                                 id
                                             }
