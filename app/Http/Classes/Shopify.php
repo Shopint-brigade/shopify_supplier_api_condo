@@ -68,28 +68,29 @@ class Shopify
      */
     public function getLocation(string $locationName, string $pass, int $first = 250): string
     {
-        $itemLocationId = "";
-        $data = "
-            locations(first:" . $first . "){
-                edges{
-                    node{
-                        name
-                        id
-                    }
-                }
-            }      
-        ";
+        // $itemLocationId = "";
+        // $data = "
+        //     locations(first:" . $first . "){
+        //         edges{
+        //             node{
+        //                 name
+        //                 id
+        //             }
+        //         }
+        //     }      
+        // ";
 
-        $response = $this->sendGraphQLRequest($pass, $this->graphQL::query($data));
-        $bodyJSONArr = $response->json()['data']['locations']['edges'];
-        if (count($bodyJSONArr) > 0) {
-            foreach ($bodyJSONArr as $location) {
-                if ($location['node']['name'] === $locationName) {
-                    $itemLocationId = $location['node']['id'];
-                }
-            }
-        }
-        return $itemLocationId;
+        // $response = $this->sendGraphQLRequest($pass, $this->graphQL::query($data));
+        // $bodyJSONArr = $response->json()['data']['locations']['edges'];
+        // if (count($bodyJSONArr) > 0) {
+        //     foreach ($bodyJSONArr as $location) {
+        //         if ($location['node']['name'] === $locationName) {
+        //             $itemLocationId = $location['node']['id'];
+        //         }
+        //     }
+        // }
+        // return $itemLocationId;
+        return 62089232584;
     }
 
     /**
