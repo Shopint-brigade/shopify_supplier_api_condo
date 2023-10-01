@@ -158,7 +158,7 @@ class Shopify
                     }
                 }
             }
-        } while (!is_null($response->json()['data']['collection']) && $response->json()['data']['collection']['products']['pageInfo']['hasNextPage']);
+        } while (isset($response->json()['data']) && isset($response->json()['data']['collection']) && $response->json()['data']['collection']['products']['pageInfo']['hasNextPage']);
         return $products;
     }
 
@@ -209,9 +209,8 @@ class Shopify
         // data to be updated
         $data = ['product' =>  ['id' =>   $id, 'images' =>  $images]];
         // send the update request
-        $jsonData = json_encode($data);
         $res = Http::withHeaders($headers)
-            ->put($this->url . '/products/' . $id . '.json', $jsonData);
+            ->put($this->url . '/products/' . $id . '.json', $data);
             info($res->status());
         return $res->status();
     }

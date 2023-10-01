@@ -20,7 +20,7 @@ class ProductDbInit extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'save all shopify products on DB(run once)';
 
     /**
      * Execute the console command.
