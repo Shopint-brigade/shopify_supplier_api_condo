@@ -25,8 +25,8 @@ class DashboardController extends Controller
         // only admin
         $this->middleware('auth');
         // shopify creds
-        $this->username = env('SHOPIFY_USER_NAME');
-        $this->password = env('SHOPIFY_PASSWORD_TOKEN');
+        $this->username =  env('ENTERENUE_SHOPIFY_KEY');
+        $this->password = env('ENTERENUE_SHOPIFY_SECRET');
         $this->shop = env('SHOPIFY_SHOP');
         $this->api = env('SHOPIFY_API');
         $this->shopify = new Shopify('https://' . $this->username . ':' . $this->password . '@' . $this->shop . '.myshopify.com/admin/' . $this->api);
