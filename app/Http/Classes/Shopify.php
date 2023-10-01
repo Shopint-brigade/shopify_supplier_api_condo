@@ -146,7 +146,8 @@ class Shopify
                 }
                 ";
             $response = $this->sendGraphQLRequest($pass, $this->graphQL::query($data));
-            if (!empty($response->json()['data']['collection']['products']['edges'])) {
+            info($response->status());
+            if (isset($response->json()['data']) && !empty($response->json()['data']['collection']['products']['edges'])) {
                 $resEdges = $response->json()['data']['collection']['products']['edges'];
                 foreach ($resEdges as $edge) {
                     $cursor = $edge['cursor'];
