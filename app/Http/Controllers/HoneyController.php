@@ -33,8 +33,8 @@ class HoneyController extends Controller
    */
   public function __construct()
   {
-    $this->username = env('SHOPIFY_USER_NAME');
-    $this->password = env('SHOPIFY_PASSWORD_TOKEN');
+    $this->username =  env('ENTERENUE_SHOPIFY_KEY');
+    $this->password = env('ENTERENUE_SHOPIFY_SECRET');
     $this->shop = env('SHOPIFY_SHOP');
     $this->api = env('SHOPIFY_API');
     $this->location_name = env('SHOPIFY_LOCATION_NAME');
