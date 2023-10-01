@@ -16,8 +16,8 @@ class Kernel extends ConsoleKernel
         // HONEY 
         ///////////////
         // update qty in DB and store with the qty from honey
-        $schedule->command('honey:sync-honey-db-shopify')->everyMinute();
         $schedule->command('honey:product-db-init')->everyMinute();
+        $schedule->command('honey:sync-honey-db-shopify')->everyThirtyMinutes();
 
         ////////////////
         // Entrenue 
